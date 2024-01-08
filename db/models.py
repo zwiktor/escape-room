@@ -9,7 +9,7 @@ from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped
 from sqlalchemy import (func, Column, Integer, String, Text, DateTime, Float, SmallInteger,
                         ForeignKey)
 
-
+from datetime import datetime
 
 class Base(DeclarativeBase):
     # Here we can add some parameters for User
@@ -22,35 +22,37 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     #story_accesses: Mapped[List["StoryAccess"]] = relationship(back_populates='user')
 
 
-# class Story(Base):
-#     __tablename__ = 'story'
-#
-#     id: Mapped[int] = mapped_column(primary_key=True)
-#     title: Mapped[str]
-#     description: Mapped[str]
-#     type: Mapped[str]
-#     difficulty: Mapped[str]
-#     rating: Mapped[Optional[float]]
-#     cost: Mapped[int]
-#     create_date: Mapped[datetime] = mapped_column(insert_default=func.now())
-#
-#     stages: Mapped[List["Stage"]] = relationship(back_populates='story')
-#
-#
-# class Stage(Base):
-#     __tablename__ = 'stage'
-#
-#     id: Mapped[int] = mapped_column(primary_key=True)
-#     level: Mapped[int]
-#     name: Mapped[str] = mapped_column(String(128))
-#     question: Mapped[str]
-#     password: Mapped[str]
-#     story_id: Mapped[int] = mapped_column(ForeignKey('story.id'))
-#
-#     story: Mapped["Story"] = relationship(back_populates='stages')
-#     documents: Mapped[List["Document"]] = relationship(back_populates='stage')
-#     hints: Mapped[List["Hint"]] = relationship(back_populates='stage')
-#
+class Story(Base):
+    __tablename__ = 'story'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str]
+    description: Mapped[str]
+    type: Mapped[str]
+    difficulty: Mapped[str]
+    rating: Mapped[Optional[float]]
+    cost: Mapped[int]
+    create_date: Mapped[datetime] = mapped_column(insert_default=datetime.now())
+
+    stages: Mapped[List["Stage"]] = relationship(back_populates='story')
+
+
+class Stage(Base):
+    __tablename__ = 'stage'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    level: Mapped[int]
+    name: Mapped[str] = mapped_column(String(128))
+    question: Mapped[str] # Tu powininem rozszerzyć tą kolumnę o tablkę w której będą
+                          # przechowywane treści dotyczące pytania(img, audio, text, itd)
+    password: Mapped[str] # rozważyć możliwość wpisania kilku haseł
+    # Dodanie atrybutu mode - mógłby on decydować w jakim formacie będzie dany poziom
+    story_id: Mapped[int] = mapped_column(ForeignKey('story.id'))
+
+    story: Mapped["Story"] = relationship(back_populates='stages')
+    # documents: Mapped[List["Document"]] = relationship(back_populates='stage')
+    hints: Mapped[List["Hint"]] = relationship(back_populates='stage')
+
 #
 # class Document(Base):
 #     __tablename__ = 'document'
@@ -62,17 +64,17 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
 #     stage: Mapped["Stage"] = relationship(back_populates='documents')
 #
 #
-# class Hint(Base):
-#     __tablename__ = 'hint'
-#
-#     id: Mapped[int] = mapped_column(primary_key=True)
-#     text: Mapped[str]
-#     trigger: Mapped[str]
-#     stage_id: Mapped[int] = mapped_column(ForeignKey("stage.id"))
-#
-#     stage: Mapped["Stage"] = relationship(back_populates='hints')
-#
-#
+class Hint(Base):
+    __tablename__ = 'hint'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    text: Mapped[str]
+    trigger: Mapped[str]
+    stage_id: Mapped[int] = mapped_column(ForeignKey("stage.id"))
+
+    stage: Mapped["Stage"] = relationship(back_populates='hints')
+
+
 # class StoryAccess(Base):
 #     __tablename__ = 'story_access'
 #
