@@ -1,10 +1,12 @@
 import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
-from db.models import Base, User, Story, Stage, Hint#, StoryAccess, PasswordAttempt#, Document
+from db.models import Base, User, Story, Stage, Hint, StoryAccess, Attempt, PasswordAttempt
+# Document
 
 from datetime import datetime, timedelta
 
+# testing meta ifnormation about table. table name, foregin key, primary key?
 
 class TestDatabase:
     def setup_class(self):
@@ -142,6 +144,33 @@ class TestDatabase:
         assert stage.hints
         assert stage.hints[0].trigger == 'to jakieś hasło'
         assert stage.hints[2].text == 'to jest pierwsza wskazówka3'
+
+    def test_storyacces_model(self):
+        user = self.session.query(User).all()[0]
+
+        story_acces = StoryAccess(
+            user_id=user.id,
+            story_id=1,
+        )
+        self.session.add(story_acces)
+        self.session.commit()
+
+        story_acces = self.session.get(StoryAccess, 1)
+
+        assert story_acces.user.id != 1
+        assert story_acces.story.id == 1
+        assert story_acces.purchase_date < datetime.now()
+        assert len(user.story_accesses) == 1
+
+    def test_attempt_model(self):
+        attempt = Attempt(
+            story_access_id=1,
+            stage_id=1
+        )
+        self.session.add(attempt)
+        self.session.commit()
+
+        assert attempt.access.story.stages[0].name == attempt.stage.name
 
 
 if __name__ == '__main__':
