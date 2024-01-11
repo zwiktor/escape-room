@@ -5,8 +5,8 @@ from db.models import Base, User, Story, Stage, Hint, StoryAccess, Attempt, Pass
 # Document
 
 from datetime import datetime, timedelta
-
 # testing meta ifnormation about table. table name, foregin key, primary key?
+
 
 class TestDatabase:
     def setup_class(self):
@@ -51,7 +51,7 @@ class TestDatabase:
         self.session.add(super_user)
         self.session.commit()
 
-        super_user = self.session.query(User).filter(User.email == 'admin@admin.com').first()
+        super_user = self.session.query(User).filter(User.email=='admin@admin.com').first()
 
         assert super_user.email
         assert super_user.hashed_password
