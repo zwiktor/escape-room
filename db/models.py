@@ -8,8 +8,8 @@ from fastapi_users.db import SQLAlchemyBaseUserTableUUID
 from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped
 from sqlalchemy import (func, Column, Integer, String, Text, DateTime, Float, SmallInteger,
                         ForeignKey)
-
 from datetime import datetime
+
 
 class Base(DeclarativeBase):
     # Here we can add some parameters for User
@@ -94,7 +94,7 @@ class Attempt(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     story_access_id: Mapped["StoryAccess"] = mapped_column(ForeignKey('story_access.id'))
-    stage_id: Mapped["Stage"] = mapped_column(ForeignKey('stage.id'))
+    stage_id: Mapped[Optional["Stage"]] = mapped_column(ForeignKey('stage.id'))
     start_date: Mapped[datetime] = mapped_column(insert_default=func.now())
     finish_date: Mapped[Optional[datetime]]
 

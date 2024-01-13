@@ -6,7 +6,7 @@ from db.database import create_db_and_tables, get_async_session
 from users.schemas import UserCreate, UserRead, UserUpdate
 from users.auth import auth_backend
 from users.manager import current_active_user, fastapi_users
-from populate_data import populate_initial_data
+from populate_data import populate_data
 from sqlalchemy.ext.asyncio import AsyncSession
 
 app = FastAPI()
@@ -36,10 +36,10 @@ app.include_router(
     tags=["users"],
 )
 
+
 @app.get("/authenticated-route")
 async def authenticated_route(user: User = Depends(current_active_user)):
     return {"message": f"Hello {user.email}!"}
-
 
 
 @app.on_event("startup")
@@ -49,8 +49,14 @@ async def on_startup():
 
 
 @app.get('/')
+async def home_page():
+    return {'message': 'hello world'}
+
+
+@app.get('/load-data')
 async def home_page(db: AsyncSession = Depends(get_async_session)):
-    var = await populate_initial_data(db)
+    var = await populate_data(db)
     return {'message': f'{var}'}
+
 
 
