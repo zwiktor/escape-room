@@ -10,4 +10,13 @@ class StoryDisplay(BaseModel):
     difficulty: str
     rating: Optional[float] = None
     cost: int
-    create_date: datetime
+
+
+class StoryBase(BaseModel):
+    title: str
+    description: str
+    type: str
+    difficulty: str
+    rating: Optional[float] = None
+    cost: int
+    create_date: Optional[datetime]

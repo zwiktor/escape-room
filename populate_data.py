@@ -105,7 +105,7 @@ async def populate_data(db: AsyncSession):
     await create_story_access(db, story, admin)
 
     return (f'Utworzono dodatkowy {story.title} z poziomami i podpowiedźami wraz z użytkownikami '
-            f'{user.email, admin.email} '
+            # f'{user.email, admin.email} '
             f'i dostępami')
 
 
