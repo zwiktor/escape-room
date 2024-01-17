@@ -1,5 +1,5 @@
 from fastapi import Depends, FastAPI
-from routers import story
+from routers import story, stage
 
 from db.models import User
 from db.database import create_db_and_tables, get_async_session
@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 app = FastAPI()
 app.include_router(story.router)
+app.include_router(stage.router)
 
 app.include_router(
     fastapi_users.get_auth_router(auth_backend), prefix="/auth/redis", tags=["auth"]

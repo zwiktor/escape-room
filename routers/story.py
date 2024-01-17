@@ -26,7 +26,7 @@ async def get_all_stories(db: AsyncSession = Depends(get_async_session)):
 
 
 @router.post('/new/', response_model=StoryDisplay)
-async def create_story(request: StoryBase, db: AsyncSession = Depends(get_async_session)):
+async def create_story(request: StoryDisplay, db: AsyncSession = Depends(get_async_session)):
     story = await db_story.create_story(db, request)
     return story
 

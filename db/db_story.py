@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from db.models import Story
-from schemas.story import StoryBase
+from schemas.story import StoryDisplay
 
 
 async def get_all_stories(db: AsyncSession):
@@ -17,7 +17,7 @@ async def get_story(story_id, db):
     return await db.scalar(stmt)
 
 
-async def create_story(db: AsyncSession, request: StoryBase):
+async def create_story(db: AsyncSession, request: StoryDisplay):
     story = Story(
         title=request.title,
         description=request.description,
