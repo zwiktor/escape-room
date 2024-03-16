@@ -6,7 +6,7 @@ from schemas.story import StoryBase
 from db.db_story import get_story
 
 
-async def get_stages(request: StoryBase, stage_leve: int, db: AsyncSession):
+async def get_stages(request: StoryBase, db: AsyncSession):
     story = await get_story(request.id, db)
     await db.refresh(story, attribute_names=["stages"])
     stages = story.stages

@@ -17,7 +17,7 @@ class Base(DeclarativeBase):
 
 
 class User(SQLAlchemyBaseUserTableUUID, Base):
-    gold: Mapped[int]
+    gold: Mapped[Optional[int]]
 
     story_accesses: Mapped[List["StoryAccess"]] = relationship(back_populates='user')
 
@@ -54,15 +54,6 @@ class Stage(Base):
     # documents: Mapped[List["Document"]] = relationship(back_populates='stage')
     hints: Mapped[List["Hint"]] = relationship(back_populates='stage')
     attempts: Mapped[List["Attempt"]] = relationship(back_populates='stage')
-#
-# class Document(Base):
-#     __tablename__ = 'document'
-#
-#     id: Mapped[int] = mapped_column(primary_key=True)
-#     name: Mapped[str]
-#     stage_id: Mapped[int] = mapped_column(ForeignKey("stage.id"))
-#
-#     stage: Mapped["Stage"] = relationship(back_populates='documents')
 
 
 class Hint(Base):
