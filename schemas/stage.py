@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class StageDisplay(BaseModel):
     name: str
+    level: int
     question: str
 
 

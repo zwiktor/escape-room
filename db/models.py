@@ -86,7 +86,7 @@ class Attempt(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     story_access_id: Mapped["StoryAccess"] = mapped_column(ForeignKey('story_access.id'))
     stage_id: Mapped[Optional["Stage"]] = mapped_column(ForeignKey('stage.id'))
-    start_date: Mapped[datetime] = mapped_column(insert_default=func.now())
+    start_date: Mapped[datetime] = mapped_column(insert_default=datetime.now())
     finish_date: Mapped[Optional[datetime]]
 
     stage: Mapped["Stage"] = relationship(back_populates='attempts')
@@ -102,7 +102,13 @@ class PasswordAttempt(Base):
     enter_date: Mapped[datetime] = mapped_column(insert_default=datetime.now())
 
 
+class HintsAttempt(Base):
+    __tablename__ = 'hints_attempt'
 
+    id: Mapped[int] = mapped_column(primary_key=True)
+    attempt_id: Mapped["Attempt"] = mapped_column(ForeignKey('attempt.id'))
+    hint_id: Mapped["Hint"] = mapped_column(ForeignKey('hint.id'))
+    enter_date: Mapped[datetime] = mapped_column(insert_default=datetime.now())
 
 
 

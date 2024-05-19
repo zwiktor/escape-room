@@ -1,5 +1,5 @@
 from fastapi import Depends, FastAPI
-from routers import story, stage
+from routers import story, stage, attempt
 
 from db.models import User
 from db.database import create_db_and_tables, get_async_session
@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 app.include_router(story.router)
 app.include_router(stage.router)
+app.include_router(attempt.router)
 
 app.include_router(
     fastapi_users.get_auth_router(auth_backend), prefix="/auth/redis", tags=["auth"]

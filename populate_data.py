@@ -7,7 +7,7 @@ from random import randint
 async def create_random_hint(db: AsyncSession, stage: Stage, number: int):
     hint = Hint(
         text=f'podpowiedź numer {number}',
-        trigger='Wyzwalacz podpowiedzi',
+        trigger=f'Wyzwalacz podpowiedzi {number}',
         stage_id=stage.id
     )
 
@@ -75,34 +75,12 @@ async def populate_user_data(db: AsyncSession):
     return user, admin
 
 
-async def create_attempt(db: AsyncSession, story, story_access):
-    attempt = Attempt(
-        story_access_id=story_access.id
-    )
-
-    db.add(attempt)
-    await db.commit()
-
-
-async def create_story_access(db: AsyncSession, story, user):
-
-    story_access = StoryAccess(
-            user_id=user.id,
-            story_id=story.id
-        )
-    db.add(story_access)
-    await db.commit()
-
-    await create_attempt(db, story, story_access)
-
-    return story_access
-
 
 async def populate_data(db: AsyncSession):
     story = await create_random_story(db)
-    user, admin = await populate_user_data(db)
-    await create_story_access(db, story, user)
-    await create_story_access(db, story, admin)
+    # user, admin = await populate_user_data(db)
+    # await create_story_access(db, story, user)
+    # await create_story_access(db, story, admin)
 
     return (f'Utworzono dodatkowy {story.title} z poziomami i podpowiedźami wraz z użytkownikami '
             # f'{user.email, admin.email} '

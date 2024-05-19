@@ -23,11 +23,27 @@ async def get_story(story_id, db):
 
 
 async def buy_story(db, story_id, user):
+    '''
+    Powinna być dodana logika z kupowaniem przygód za monedy/punkty
+    :param db:
+    :param story_id:
+    :param user:
+    :return:
+    '''
     story_access = await get_or_create(session=db, model=StoryAccess,
                                        story_id=story_id,
                                        user_id=user.id)
-    await db.refresh(story_access, attribute_names=['story'])
-    return story_access.story
+    return story_access
+
+
+async def start_story(db, story_id, user):
+    stage = await get_instance(db, Stage, story_id=story_id, level=1)
+    story_access = await buy_story(db, story_id, user)
+    attempt = await get_or_create(session=db, model=Attempt,
+                                  story_access_id=story_access.id,
+                                  stage_id=stage.id)
+
+    return attempt
 
 
 async def create_story(db: AsyncSession, request: StoryDisplay):
