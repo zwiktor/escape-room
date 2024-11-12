@@ -13,4 +13,3 @@ class StageBase(BaseModel):
     question: str
     password: str
     story_id: int
-

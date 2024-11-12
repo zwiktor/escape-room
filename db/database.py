@@ -5,8 +5,8 @@ from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from db.models import Base, User
 
-DATABASE_URL = "sqlite+aiosqlite:///./devdb.db"
 
+DATABASE_URL = "sqlite+aiosqlite:///./devdb.db"
 engine = create_async_engine(DATABASE_URL)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
 

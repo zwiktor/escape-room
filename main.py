@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI
+from starlette.requests import Request
 from routers import story, stage, attempt
 
 from db.models import User
@@ -54,19 +55,19 @@ async def on_startup():
     await create_db_and_tables()
 
 
-@app.get('/')
+@app.get("/")
 async def home_page():
-    return {'message': 'hello world'}
+    return {"message": "hello world"}
 
 
-@app.get('/load-data')
+@app.get("/load-data")
 async def home_page(db: AsyncSession = Depends(get_async_session)):
     var = await populate_data(db)
-    return {'message': f'{var}'}
+    return {"message": f"{var}"}
 
 
 origins = [
-    'http://localhost:3000',
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -76,4 +77,3 @@ app.add_middleware(
     allow_methods=["*"],  # Allows all HTTP methods
     allow_headers=["*"],  # Allows all headers
 )
-

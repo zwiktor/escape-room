@@ -29,8 +29,6 @@ class PasswordFormBase(BaseModel):
 
 class PasswordCheckDisplay(BaseModel):
     message: str
-    new_hint: Optional[bool]
+    new_hint: bool = False
     next_attempt: Optional[int] = None
     end_story: bool = False
-
-

@@ -1,4 +1,8 @@
-from fastapi_users.authentication import AuthenticationBackend, BearerTransport, RedisStrategy
+from fastapi_users.authentication import (
+    AuthenticationBackend,
+    BearerTransport,
+    RedisStrategy,
+)
 import redis.asyncio
 
 bearer_transport = BearerTransport(tokenUrl="auth/redis/login")

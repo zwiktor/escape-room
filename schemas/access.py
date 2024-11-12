@@ -6,10 +6,10 @@ from uuid import UUID
 
 
 class StatusEnum(str, Enum):
-    new = 'new'
-    purchased = 'purchased'
-    started = 'started'
-    ended = 'finished'
+    new = "new"
+    purchased = "purchased"
+    started = "started"
+    ended = "finished"
 
 
 class AttemptBase(BaseModel):
@@ -35,6 +35,3 @@ class StoryAccessBase(BaseModel):
 class StoryStatus(BaseModel):
     status: StatusEnum
     story_access: Optional[StoryAccessBase]
-
-
-

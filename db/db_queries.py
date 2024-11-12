@@ -5,7 +5,9 @@ from typing import Type, List, Any
 from pydantic import BaseModel
 
 
-def convert_to_pydantic(models: List[Any], pydantic_model: Type[BaseModel]) -> List[BaseModel]:
+def convert_to_pydantic(
+    models: List[Any], pydantic_model: Type[BaseModel]
+) -> List[BaseModel]:
     return [pydantic_model.model_validate(model) for model in models]
 
 
