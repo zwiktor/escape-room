@@ -449,3 +449,67 @@ def test_create_hints_attempt(session):
     assert fetched_hints_attempt.attempt_id == attempt.id
     assert fetched_hints_attempt.hint_id == hint.id
     assert fetched_hints_attempt.enter_date is not None
+
+
+def test_default_date_values(session):
+    """Test that default dates are set to the current date and time."""
+    story = Story(
+        title="Date Test Story",
+        description="A story to test default date",
+        type="Adventure",
+        difficulty="Medium",
+        rating=4.5,
+        cost=30,
+    )
+    session.add(story)
+    session.commit()
+
+    assert story.create_date is not None
+    assert story.create_date <= datetime.now()
+
+    password_attempt = PasswordAttempt(
+        attempt_id=1,  # Zakładamy, że istnieje `Attempt` o `id=1`
+        password="test_password",
+    )
+    session.add(password_attempt)
+    session.commit()
+
+    assert password_attempt.enter_date is not None
+    assert password_attempt.enter_date <= datetime.now()
+
+
+def test_relationship_back_populates(session):
+    """Test bidirectional relationships and back_populates."""
+    # Tworzenie użytkownika i powiązanej historii
+    user = User(
+        username="back_populate_user",
+        email="backpopulate@example.com",
+        hashed_password="hashed_password",
+        is_active=True,
+        is_superuser=False,
+        is_verified=True,
+    )
+    session.add(user)
+    session.commit()
+
+    story = Story(
+        title="Back Populate Story",
+        description="Story to test back_populates",
+        type="Mystery",
+        difficulty="Easy",
+        rating=3.9,
+        cost=15,
+    )
+    session.add(story)
+    session.commit()
+
+    story_access = StoryAccess(
+        user_id=user.id, story_id=story.id, purchase_date=datetime.now()
+    )
+    session.add(story_access)
+    session.commit()
+
+    # Sprawdzanie relacji z obiektu User
+    assert user.story_accesses[0].story_id == story.id
+    # Sprawdzanie relacji z obiektu StoryAccess
+    assert story_access.user.username == "back_populate_user"

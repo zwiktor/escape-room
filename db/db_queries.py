@@ -1,8 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from sqlalchemy import and_
-from typing import Type, List, Any
+from typing import Type, List, Any, Optional
 from pydantic import BaseModel
+
+
+class MultipleResultsException(Exception):
+    """Exception raised when multiple results are found in a single-instance query."""
+
+    pass
 
 
 def convert_to_pydantic(
@@ -11,12 +17,20 @@ def convert_to_pydantic(
     return [pydantic_model.model_validate(model) for model in models]
 
 
-async def get_instance(session: AsyncSession, model, **kwargs):
+async def get_instance(
+    session: AsyncSession, model: Type[Any], **kwargs
+) -> Optional[Any]:
     stmt = select(model).filter_by(**kwargs)
     result = await session.execute(stmt)
-    instance = result.scalars().first()
-    if instance:
-        return instance
+    instances = result.scalars().all()
+
+    if len(instances) > 1:
+        raise MultipleResultsException(
+            f"Multiple instances found for {model.__name__} with filters {kwargs}."
+        )
+    elif instances:
+        return instances[0]
+    return None
 
 
 async def get_last_instance(session: AsyncSession, model, order_by, **kwargs):

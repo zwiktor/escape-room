@@ -75,6 +75,9 @@ class Hint(Base):
     stage_id: Mapped[int] = mapped_column(ForeignKey("stage.id"))
 
     stage: Mapped["Stage"] = relationship(back_populates="hints")
+    hints_attempts: Mapped[List["HintsAttempt"]] = relationship(
+        "HintsAttempt", back_populates="hint"
+    )
 
 
 class StoryAccess(Base):
@@ -103,6 +106,12 @@ class Attempt(Base):
 
     stage: Mapped["Stage"] = relationship(back_populates="attempts")
     access: Mapped["StoryAccess"] = relationship(back_populates="attempts")
+    password_attempts: Mapped[List["PasswordAttempt"]] = relationship(
+        "PasswordAttempt", back_populates="attempt"
+    )
+    hints_attempts: Mapped[List["HintsAttempt"]] = relationship(
+        "HintsAttempt", back_populates="attempt"
+    )
 
 
 class PasswordAttempt(Base):
@@ -113,6 +122,10 @@ class PasswordAttempt(Base):
     password: Mapped[str]
     enter_date: Mapped[datetime] = mapped_column(insert_default=datetime.now())
 
+    attempt: Mapped["Attempt"] = relationship(
+        "Attempt", back_populates="password_attempts"
+    )
+
 
 class HintsAttempt(Base):
     __tablename__ = "hints_attempt"
@@ -121,3 +134,8 @@ class HintsAttempt(Base):
     attempt_id: Mapped["Attempt"] = mapped_column(ForeignKey("attempt.id"))
     hint_id: Mapped["Hint"] = mapped_column(ForeignKey("hint.id"))
     enter_date: Mapped[datetime] = mapped_column(insert_default=datetime.now())
+
+    attempt: Mapped["Attempt"] = relationship(
+        "Attempt", back_populates="hints_attempts"
+    )
+    hint: Mapped["Hint"] = relationship("Hint", back_populates="hints_attempts")
