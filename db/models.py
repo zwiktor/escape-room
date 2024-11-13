@@ -5,7 +5,13 @@ from uuid import UUID
 
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID
 
-from sqlalchemy.orm import DeclarativeBase, relationship, mapped_column, Mapped
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    relationship,
+    mapped_column,
+    Mapped,
+    validates,
+)
 from sqlalchemy import (
     func,
     Column,
@@ -30,6 +36,12 @@ class User(SQLAlchemyBaseUserTableUUID, Base):
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
 
     story_accesses: Mapped[List["StoryAccess"]] = relationship(back_populates="user")
+
+    @validates("username", "email")
+    def validate_non_empty(self, key, value):
+        if not value:
+            raise ValueError(f"{key.capitalize()} cannot be empty.")
+        return value
 
 
 class Story(Base):
