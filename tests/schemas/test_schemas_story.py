@@ -5,7 +5,7 @@ from schemas.story import StoryDisplay, StoryBase  # Adjust to the correct impor
 
 
 def test_story_base_schema():
-    # Valid data
+    # Valid data with all fields included
     valid_data = {
         "id": 1,
         "title": "Mystery Adventure",
@@ -18,7 +18,7 @@ def test_story_base_schema():
     }
 
     try:
-        # Attempting to create a StoryBase instance with valid data
+        # Attempt to create StoryBase instance
         story_base = StoryBase(**valid_data)
         assert story_base.id == 1
         assert story_base.title == "Mystery Adventure"
@@ -28,10 +28,9 @@ def test_story_base_schema():
         assert story_base.rating == 4.5
         assert story_base.cost == 20
         assert story_base.create_date == datetime(2023, 1, 1, 12, 0, 0)
-
     except ValidationError as e:
-        # Print the validation error details for debugging
-        print("Validation error:", e)
+        # Print the error details for debugging
+        print("Validation Error for valid_data:", e.errors())
         raise
 
     # Valid data without optional create_date
@@ -47,9 +46,8 @@ def test_story_base_schema():
     try:
         story_base = StoryBase(**minimal_data)
         assert story_base.create_date is None  # create_date should default to None
-
     except ValidationError as e:
-        print("Validation error in minimal_data:", e)
+        print("Validation Error for minimal_data:", e.errors())
         raise
 
     # Invalid data: wrong data type for create_date
@@ -65,5 +63,6 @@ def test_story_base_schema():
             create_date="not_a_datetime",
         )
 
+    # Check for specific error details in the exception
     assert "create_date" in str(exc_info.value)
     assert "Input should be a valid datetime" in str(exc_info.value)

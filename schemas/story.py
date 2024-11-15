@@ -14,4 +14,4 @@ class StoryDisplay(BaseModel):
 
 class StoryBase(StoryDisplay):
     id: int
-    create_date: Optional[datetime]
+    create_date: Optional[datetime] = None
