@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from db.models import Story, Stage, StoryAccess, Attempt
 from schemas.story import StoryDisplay
-from db.db_queries import get_instance, get_or_create
+from db.db_queries import get_instance, get_or_create, create_instance, get_instances
 
 
 async def first_stage(db, story_id, level: int = 1):
@@ -10,8 +10,7 @@ async def first_stage(db, story_id, level: int = 1):
 
 
 async def get_all_stories(db: AsyncSession):
-    stmt = select(Story)
-    all_stories = await db.scalars(stmt)
+    all_stories = await get_instances(db, Story)
 
     return all_stories
 
@@ -47,7 +46,9 @@ async def start_story(db, story_id, user):
 
 
 async def create_story(db: AsyncSession, request: StoryDisplay):
-    story = Story(
+    story = await create_instance(
+        db,
+        Story,
         title=request.title,
         description=request.description,
         type=request.type,
@@ -55,8 +56,5 @@ async def create_story(db: AsyncSession, request: StoryDisplay):
         rating=request.rating,
         cost=request.cost,
     )
-
-    db.add(story)
-    await db.commit()
 
     return story

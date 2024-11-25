@@ -3,6 +3,7 @@ from sqlalchemy import select, desc
 from sqlalchemy import and_
 from typing import Type, List, Any, Optional
 from pydantic import BaseModel
+from sqlalchemy import true
 
 
 class MultipleResultsException(Exception):
@@ -63,7 +64,7 @@ async def get_instances(session: AsyncSession, model, **kwargs):
             filters.append(getattr(model, attr).in_(value))
         else:
             filters.append(getattr(model, attr) == value)
-    stmt = select(model).where(and_(*filters))
+    stmt = select(model).where(and_(true(), *filters))
     result = await session.execute(stmt)
     instances = result.scalars().all()
     return instances

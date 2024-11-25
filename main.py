@@ -1,5 +1,5 @@
 from fastapi import Depends, FastAPI
-from routers import story, stage, attempt, custom_login
+from routers import story, stage, attempt
 
 from db.models import User
 from db.database import create_db_and_tables, get_async_session
@@ -26,7 +26,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(story.router)
 app.include_router(stage.router)
 app.include_router(attempt.router)
-# app.include_router(custom_login.router, prefix="/auth", tags=["auth"])
+
 
 app.include_router(
     fastapi_users.get_auth_router(auth_backend),
