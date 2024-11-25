@@ -1,7 +1,7 @@
 from typing import AsyncGenerator
 
 from fastapi import Depends
-from fastapi_users.db import SQLAlchemyUserDatabase
+from db.extended_user_database import ExtendedSQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from db.models import Base, User
 
@@ -22,4 +22,4 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
-    yield SQLAlchemyUserDatabase(session, User)
+    yield ExtendedSQLAlchemyUserDatabase(session, User)

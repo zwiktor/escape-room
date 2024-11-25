@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import OperationalError
 from db.database import create_db_and_tables, get_async_session, get_user_db, engine
 from db.models import Base, User
-from fastapi_users.db import SQLAlchemyUserDatabase
+from db.extended_user_database import ExtendedSQLAlchemyUserDatabase
 from sqlalchemy.sql import text
 
 
@@ -52,8 +52,8 @@ async def test_get_async_session():
 
 @pytest.mark.asyncio
 async def test_get_user_db():
-    """Test that get_user_db yields a SQLAlchemyUserDatabase instance."""
+    """Test that get_user_db yields a ExtendedSQLAlchemyUserDatabase instance."""
     async for session in get_async_session():
         async for user_db in get_user_db(session):
             assert user_db is not None
-            assert isinstance(user_db, SQLAlchemyUserDatabase)
+            assert isinstance(user_db, ExtendedSQLAlchemyUserDatabase)

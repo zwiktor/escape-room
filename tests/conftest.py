@@ -2,23 +2,22 @@ import pytest
 import json
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from db.models import (
-    Base,
-    User,
-    Story,
-    Stage,
-    StoryAccess,
-    Hint,
-    PasswordAttempt,
-    Attempt,
-    HintsAttempt,
-)  # Zastąp `db.models` odpowiednim importem modeli
+from db.models import *
+from users.manager import get_user_manager
 from pathlib import Path
 from datetime import datetime
+import logging
+from httpx import ASGITransport, AsyncClient
+from main import app
+import redis.asyncio as aioredis
+from db.extended_user_database import ExtendedSQLAlchemyUserDatabase
+from db.models import User
+from fastapi_users.password import PasswordHelper
 
+REDIS_URL = "redis://localhost:6379/0"
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 # Tworzymy asynchroniczny silnik i konfigurujemy sesję
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL, echo=False)
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
@@ -155,3 +154,53 @@ async def session():
     async with AsyncSessionLocal() as session:
         yield session
         await session.rollback()
+
+
+@pytest_asyncio.fixture
+async def redis_client():
+    """Provide a Redis client for testing."""
+    redis = aioredis.from_url(REDIS_URL, decode_responses=True)
+    await redis.flushdb()  # Clear Redis before each test
+    yield redis
+    await redis.flushdb()
+    await redis.aclose()
+
+
+@pytest_asyncio.fixture(scope="function", autouse=True)
+def suppress_sqlalchemy_logs():
+    """Suppress SQLAlchemy logs."""
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+    logging.getLogger("sqlalchemy.pool").setLevel(logging.WARNING)
+
+
+@pytest_asyncio.fixture
+async def async_client():
+    """Fixture for the HTTPX AsyncClient."""
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://testserver"
+    ) as client:
+        yield client
+
+
+@pytest_asyncio.fixture
+async def user_manager(session: AsyncSession):
+    user_db = ExtendedSQLAlchemyUserDatabase(session, User)
+    # Optionally prepopulate users
+    password_helper = PasswordHelper()
+    raw_password = "test_password"
+    hashed_password = password_helper.hash(raw_password)
+
+    test_user = User(
+        email="test@example.com",
+        username="testuser",
+        hashed_password=hashed_password,
+        gold=1,
+        is_active=1,
+        is_superuser=0,
+        is_verified=1,
+    )
+    session.add(test_user)
+    await session.commit()
+
+    async for manager in get_user_manager(user_db=user_db):
+        yield manager

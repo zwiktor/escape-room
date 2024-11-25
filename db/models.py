@@ -3,7 +3,7 @@ from typing import List, Optional
 from datetime import datetime
 from uuid import UUID
 
-from fastapi_users.db import SQLAlchemyBaseUserTableUUID
+from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTableUUID
 
 from sqlalchemy.orm import (
     DeclarativeBase,

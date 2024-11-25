@@ -1,25 +1,37 @@
 from fastapi import Depends, FastAPI
-from starlette.requests import Request
-from routers import story, stage, attempt
+from routers import story, stage, attempt, custom_login
 
 from db.models import User
 from db.database import create_db_and_tables, get_async_session
 from users.schemas import UserCreate, UserRead, UserUpdate
-from users.auth import auth_backend
 from users.manager import current_active_user, fastapi_users
+from users.auth import auth_backend
 from populate_data import populate_data
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Database setup
+    await create_db_and_tables()
+    yield
+    # Shutdown: Any necessary cleanup (if required)
+
+
+app = FastAPI(lifespan=lifespan)
+
 app.include_router(story.router)
 app.include_router(stage.router)
 app.include_router(attempt.router)
+# app.include_router(custom_login.router, prefix="/auth", tags=["auth"])
 
 app.include_router(
-    fastapi_users.get_auth_router(auth_backend), prefix="/auth/redis", tags=["auth"]
+    fastapi_users.get_auth_router(auth_backend),
+    prefix="/auth/redis",
+    tags=["auth"],
 )
 
 app.include_router(
@@ -46,13 +58,7 @@ app.include_router(
 
 @app.get("/authenticated-route")
 async def authenticated_route(user: User = Depends(current_active_user)):
-    return {"message": f"Hello {user.email}!"}
-
-
-@app.on_event("startup")
-async def on_startup():
-    # Not needed if you setup a migration system like Alembic
-    await create_db_and_tables()
+    return {"message": f"Hello {user.name or user.email}!"}
 
 
 @app.get("/")

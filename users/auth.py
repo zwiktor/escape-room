@@ -5,9 +5,10 @@ from fastapi_users.authentication import (
 )
 import redis.asyncio
 
+REDIS_URL = "redis://localhost:6379"
 bearer_transport = BearerTransport(tokenUrl="auth/redis/login")
 
-redis = redis.asyncio.from_url("redis://localhost:6379", decode_responses=True)
+redis = redis.asyncio.from_url(REDIS_URL, decode_responses=True)
 
 
 def get_redis_strategy() -> RedisStrategy:
