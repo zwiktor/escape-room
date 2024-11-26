@@ -43,7 +43,7 @@ async def get_last_instance(session: AsyncSession, model, order_by, **kwargs):
 
 
 async def get_first_instance(session: AsyncSession, model, order_by, **kwargs):
-    stmt = select(model).filter_by(**kwargs).order_by(model.id)
+    stmt = select(model).filter_by(**kwargs).order_by(order_by)
     result = await session.execute(stmt)
     instance = result.scalars().first()
     if instance:
