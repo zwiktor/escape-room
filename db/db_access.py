@@ -7,6 +7,10 @@ from db.models import User
 
 
 async def check_status(db: AsyncSession, user: User, story_id: int):
+    story = await get_instance(db, Story, id=story_id)
+    if not story:
+        return None
+
     data = {
         "status": "new",
         "story_access": {"purchase_date": None, "current_attempt": None},
