@@ -13,6 +13,8 @@ import redis.asyncio as aioredis
 from db.extended_user_database import ExtendedSQLAlchemyUserDatabase
 from db.models import User
 from fastapi_users.password import PasswordHelper
+from db.db_queries import get_instance
+
 
 REDIS_URL = "redis://localhost:6379/0"
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -204,3 +206,8 @@ async def user_manager(session: AsyncSession):
 
     async for manager in get_user_manager(user_db=user_db):
         yield manager
+
+
+@pytest_asyncio.fixture
+async def mock_user(session: AsyncSession):
+    return await get_instance(session, User, username="user1")

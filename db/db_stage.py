@@ -22,6 +22,10 @@ async def get_stage(request: StoryBase, stage_level: int, db: AsyncSession):
     return stages
 
 
+async def first_stage(db, story_id, level: int = 1):
+    return await get_instance(session=db, model=Stage, story_id=story_id, level=level)
+
+
 async def get_next_stage(stage: Stage, db: AsyncSession):
     next_level = stage.level + 1
     next_stage = await get_instance(

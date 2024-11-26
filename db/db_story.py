@@ -5,10 +5,6 @@ from schemas.story import StoryDisplay
 from db.db_queries import get_instance, get_or_create, create_instance, get_instances
 
 
-async def first_stage(db, story_id, level: int = 1):
-    return await get_instance(session=db, model=Stage, story_id=story_id, level=level)
-
-
 async def get_all_stories(db: AsyncSession):
     all_stories = await get_instances(db, Story)
 
