@@ -6,27 +6,30 @@ from schemas.story import StoryDisplay
 
 
 @pytest.mark.asyncio
-async def test_get_stages_existing_story(session):
+async def test_get_next_stage_existing(session: AsyncSession):
     """
-    Test retrieval of all stages for an existing story.
-    Scenario: The story has multiple stages.
-    Expected: A list of stages associated with the story is returned.
+    Test retrieval of the next stage after the current stage.
+    Scenario: The current stage has a valid next stage.
+    Expected: The correct next stage is returned.
     """
-    story_request = StoryBase(id=1)
-    stages = await get_stages(story_request, session)
+    current_stage = await first_stage(session, story_id=1, level=1)
+    next_stage = await get_next_stage(current_stage, session)
 
-    assert isinstance(stages, list)
-    assert len(stages) > 0
-    assert all(isinstance(stage, Stage) for stage in stages)
+    assert next_stage is not None
+    assert next_stage.level == current_stage.level + 1
+    assert next_stage.name == "Second Challenge"  # Example name
 
 
 @pytest.mark.asyncio
-async def test_get_stages_nonexistent_story(session):
+async def test_get_next_stage_nonexistent(session: AsyncSession):
     """
-    Test retrieval of stages for a non-existent story.
-    Scenario: The story does not exist in the database.
-    Expected: The function raises an exception or returns None.
+    Test retrieval of the next stage for the last stage of a story.
+    Scenario: The current stage does not have a next stage.
+    Expected: None is returned.
     """
-    story_request = StoryBase(id=999)
-    with pytest.raises(Exception):  # Adjust the exception type based on actual behavior
-        await get_stages(story_request, session)
+    current_stage = await first_stage(
+        session, story_id=1, level=5
+    )  # Assuming level 5 is the last
+    next_stage = await get_next_stage(current_stage, session)
+
+    assert next_stage is None

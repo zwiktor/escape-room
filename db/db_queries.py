@@ -42,6 +42,14 @@ async def get_last_instance(session: AsyncSession, model, order_by, **kwargs):
         return instance
 
 
+async def get_first_instance(session: AsyncSession, model, order_by, **kwargs):
+    stmt = select(model).filter_by(**kwargs).order_by(model.id)
+    result = await session.execute(stmt)
+    instance = result.scalars().first()
+    if instance:
+        return instance
+
+
 async def create_instance(session: AsyncSession, model, **kwargs):
     instance = model(**kwargs)
     session.add(instance)

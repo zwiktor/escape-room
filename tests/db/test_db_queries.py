@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from db.models import User, Story
+from db.models import User, Story, Stage
 from db.db_queries import (
     convert_to_pydantic,
     get_instance,
@@ -10,6 +10,7 @@ from db.db_queries import (
     get_or_create,
     get_instances,
     MultipleResultsException,
+    get_first_instance,
 )
 from pydantic import BaseModel
 
@@ -182,3 +183,17 @@ async def test_get_last_instance(session: AsyncSession):
     # Assert: The function should return the existing user, not create a new one
     assert user.email == "user4@example.com"
     assert user.username == "user4"
+
+
+@pytest.mark.asyncio
+async def test_get_first_instance(session: AsyncSession):
+    """Test get_last_instance retrieves the last added object it matches the criteria."""
+    user = await get_first_instance(session, User, "username")
+    stage = await get_first_instance(session, Stage, "id", story_id=2)
+
+    # Assert: The function should return the existing user, not create a new one
+    assert user.email == "user1@example.com"
+    assert user.username == "user1"
+
+    assert stage.name == "First Challenge Indiana"
+    assert stage.level == 1

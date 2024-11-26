@@ -1,5 +1,5 @@
 from fastapi import Depends, FastAPI
-from routers import story, stage, attempt
+from routers import story, attempt
 
 from db.models import User
 from db.database import create_db_and_tables, get_async_session
@@ -24,7 +24,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(story.router)
-app.include_router(stage.router)
 app.include_router(attempt.router)
 
 
