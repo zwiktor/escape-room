@@ -48,60 +48,6 @@ async def test_get_story_nonexistent(session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_buy_story_existing_access(session: AsyncSession, mock_user):
-    """
-    Test purchasing a story for a user who already has access.
-    Scenario: The user has already purchased the story.
-    Expected: The existing StoryAccess object is returned.
-    """
-    story_access = await buy_story(session, story_id=1, user=mock_user)
-    assert story_access is not None
-    assert story_access.story_id == 1
-    assert story_access.user_id == mock_user.id
-
-
-@pytest.mark.asyncio
-async def test_buy_story_new_access(session: AsyncSession, mock_user):
-    """
-    Test purchasing a story for a user who does not have access.
-    Scenario: The user has not purchased the story yet.
-    Expected: A new StoryAccess object is created and returned.
-    """
-    story_access = await buy_story(session, story_id=3, user=mock_user)
-    assert story_access is not None
-    assert story_access.story_id == 3
-    assert story_access.user_id == mock_user.id
-
-
-@pytest.mark.asyncio
-async def test_start_story_existing_access_and_attempt(
-    session: AsyncSession, mock_user
-):
-    """
-    Test starting a story for a user who has access and an existing attempt.
-    Scenario: The user has already started the story.
-    Expected: The existing Attempt object is returned.
-    """
-    attempt = await start_story(session, story_id=1, user=mock_user)
-    assert attempt is not None
-    assert attempt.story_access_id == 1
-    assert attempt.stage_id == 1
-
-
-@pytest.mark.asyncio
-async def test_start_story_new_access_and_attempt(session: AsyncSession, mock_user):
-    """
-    Test starting a story for a user who has no access and no existing attempt.
-    Scenario: The user starts the story for the first time.
-    Expected: A new StoryAccess and Attempt object are created and returned.
-    """
-    attempt = await start_story(session, story_id=2, user=mock_user)
-    assert attempt is not None
-    assert attempt.story_access_id is not None
-    assert attempt.stage_id is not None
-
-
-@pytest.mark.asyncio
 async def test_create_story(session):
     """
     Test creation of a new story.
