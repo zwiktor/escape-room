@@ -1,9 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.models import User, Story, attempt
+from db.models import User, Story, Attempt
 from schemas.access import StoryStatus, StatusEnum, StoryAccessBase, AttemptBase
 from typing import Optional
 from db.db_attempt import get_active_attempt
 from db.db_access import get_story_access_by_attempt, get_story_access
+from db.db_story import get_story_by_id
 
 
 class StoryManager:

@@ -79,7 +79,7 @@ async def test_get_story_access_by_attempt_invalid_user(
     session: AsyncSession, mock_user: User
 ):
     # Pobierz przykładową próbę i użytkownika, który nie ma dostępu
-    attempt_id = 4  # Zakładamy, że attempt_id 1 istnieje w test_data.json
+    attempt_id = 5  # Zakładamy, że attempt_id 1 istnieje w test_data.json
 
     # Wywołanie testowanej funkcji
     story_access = await get_story_access_by_attempt(session, attempt_id, mock_user)

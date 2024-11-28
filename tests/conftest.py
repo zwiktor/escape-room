@@ -14,6 +14,7 @@ from db.extended_user_database import ExtendedSQLAlchemyUserDatabase
 from db.models import User
 from fastapi_users.password import PasswordHelper
 from db.db_queries import get_instance
+from db.storymanager import StoryManager
 
 
 REDIS_URL = "redis://localhost:6379/0"
@@ -211,3 +212,9 @@ async def user_manager(session: AsyncSession):
 @pytest_asyncio.fixture
 async def mock_user(session: AsyncSession):
     return await get_instance(session, User, username="user1")
+
+
+@pytest_asyncio.fixture
+async def story_manager(session: AsyncSession, mock_user: User):
+    """Fixture for creating a StoryManager instance."""
+    return StoryManager(session, mock_user)

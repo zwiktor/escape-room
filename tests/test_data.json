@@ -149,6 +149,12 @@
     },
     {
       "story_access_user_email": "user1@example.com",
+      "story_access_story_title": "Adventure Story",
+      "stage_name": "Second Challenge",
+      "start_date": "2023-11-12T13:30:00"
+    },
+    {
+      "story_access_user_email": "user1@example.com",
       "story_access_story_title": "Indiana jonse Story",
       "stage_name": "First Challenge Indiana",
       "start_date": "2023-11-12T13:00:00",
