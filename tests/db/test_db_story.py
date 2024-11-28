@@ -1,6 +1,12 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.db_story import get_all_stories, get_story, buy_story, start_story, create_story
+from db.db_story import (
+    get_all_stories,
+    get_story_by_id,
+    buy_story,
+    start_story,
+    create_story,
+)
 from db.models import Story
 from schemas.story import StoryDisplay
 
@@ -25,7 +31,7 @@ async def test_get_story_existing(session: AsyncSession):
     Scenario: The story exists in the database.
     Expected: The correct story object is returned.
     """
-    story = await get_story(story_id=1, db=session)
+    story = await get_story_by_id(story_id=1, db=session)
     assert story is not None
     assert story.id == 1
 
@@ -37,7 +43,7 @@ async def test_get_story_nonexistent(session: AsyncSession):
     Scenario: The story ID does not match any records.
     Expected: None is returned.
     """
-    story = await get_story(story_id=999, db=session)
+    story = await get_story_by_id(story_id=999, db=session)
     assert story is None
 
 

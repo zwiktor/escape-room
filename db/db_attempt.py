@@ -15,6 +15,7 @@ from db.db_queries import (
     get_instance,
     get_instances,
     get_or_create,
+    get_last_instance,
     convert_to_pydantic,
     create_instance,
 )
@@ -24,15 +25,25 @@ from schemas.attempt import (
     PasswordFormBase,
     PasswordCheckDisplay,
 )
+from schemas.stage import StageDisplay
+
 from sqlalchemy import func
 
 
-async def get_attempt(attempt_id: int, db: AsyncSession, user: User):
-    attempt = await get_instance(db, Attempt, id=attempt_id)
-    stage = await get_instance(db, Stage, id=attempt.stage_id)
+async def get_active_attempt(db: AsyncSession, story_access_id: int):
+    attempt = await get_last_instance(
+        db, Attempt, order_by="id", story_access_id=story_access_id
+    )
+    if attempt:
+        return attempt
+    return None
 
-    data = {"start_date": attempt.start_date, "stage": stage}
-    return data
+
+async def get_attempt_by_id_with_user(db: AsyncSession, attempt_id: int, user: User):
+    attempt = await get_instance(db, Attempt, id=attempt_id)
+    if attempt:
+        return attempt
+    return None
 
 
 async def get_hints(attempt_id: int, db: AsyncSession, user: User):

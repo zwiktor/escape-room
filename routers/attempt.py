@@ -26,7 +26,7 @@ async def get_attempt(
     db: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_active_user),
 ):
-    attempt_display = await db_attempt.get_attempt(attempt_id, db, user)
+    attempt_display = await db_attempt.get_attempt(db, attempt_id, user)
     return attempt_display
 
 

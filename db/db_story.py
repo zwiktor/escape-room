@@ -11,7 +11,7 @@ async def get_all_stories(db: AsyncSession):
     return all_stories
 
 
-async def get_story(story_id, db):
+async def get_story_by_id(db: AsyncSession, story_id: int):
     stmt = select(Story).where(Story.id == story_id)
 
     return await db.scalar(stmt)

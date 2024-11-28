@@ -1,9 +1,27 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from db.models import Story, Stage, StoryAccess, Attempt
+from typing import Optional
+from uuid import UUID
 
 from db.db_queries import get_instance, get_or_create, get_last_instance
 from db.models import User
+
+
+async def get_story_access(db: AsyncSession, user: User, story_id: int) -> StoryAccess:
+    """Fetch a specific StoryAccess instance."""
+    return await get_instance(db, StoryAccess, user_id=user_id, story_id=story_id)
+
+
+async def get_story_access_by_attempt(
+    db: AsyncSession, attempt_id: int, user: User
+) -> Optional[StoryAccess]:
+    """Fetch a specific StoryAccess instance by attempt."""
+    attempt = await get_instance(db, Attempt, id=attempt_id)
+    story_access = attempt.access
+    if story_access.user_id == user.id:
+        return await get_instance(db, StoryAccess, user_id=user_id, story_id=story_id)
+    return None
 
 
 async def check_status(db: AsyncSession, user: User, story_id: int):
