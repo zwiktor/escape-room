@@ -1,77 +1,90 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from db.models import Story, Stage, StoryAccess, Attempt, User
-from db.db_queries import get_instance, get_or_create, get_last_instance
-from db.db_access import check_status
+from db.db_access import get_story_access, get_story_access_by_attempt
 from schemas.access import *
 
 
 @pytest.mark.asyncio
-async def test_check_status_new_story(session: AsyncSession, mock_user: User):
-    """
-    Test case for a new story without any access or attempts.
-    Expected: Status is 'new' with no access or attempts.
-    """
-    result = await check_status(
-        db=session, user=mock_user, story_id=4
-    )  # Non-existing story_id
-    assert result == {
-        "status": "new",
-        "story_access": {"purchase_date": None, "current_attempt": None},
-    }
+async def test_get_story_access(session: AsyncSession, mock_user: User):
+    # Pobierz przykładowego użytkownika i przygodę z danych testowych
+    story_id = 1  # Zakładamy, że story_id 1 istnieje w test_data.json
+
+    # Wywołanie testowanej funkcji
+    story_access = await get_story_access(session, mock_user, story_id)
+
+    # Sprawdzenie poprawności wyniku
+    assert (
+        story_access is not None
+    ), "StoryAccess should exist for the given user and story_id."
+    assert isinstance(
+        story_access, StoryAccess
+    ), "Returned object should be an instance of StoryAccess."
+    assert story_access.user_id == mock_user.id, "User ID should match the given user."
+    assert (
+        story_access.story_id == story_id
+    ), "Story ID should match the given story_id."
 
 
 @pytest.mark.asyncio
-async def test_check_status_purchased_story(session: AsyncSession, mock_user: User):
-    """
-    Test case for a purchased story without any attempts.
-    Expected: Status is 'purchased' with the purchase date set.
-    """
-    result = await check_status(
-        db=session, user=mock_user, story_id=3
-    )  # Existing story_id
-    assert result["status"] == "purchased"
-    assert result["story_access"]["purchase_date"] is not None
-    assert result["story_access"]["current_attempt"] is None
+async def test_get_story_access_nonexistent(session: AsyncSession, mock_user: User):
+    # Pobierz przykładowego użytkownika i nieistniejącą przygodę
+    story_id = 9999  # Zakładamy, że takie story_id nie istnieje
+
+    # Wywołanie testowanej funkcji
+    story_access = await get_story_access(session, mock_user, story_id)
+
+    # Sprawdzenie poprawności wyniku
+    assert (
+        story_access is None
+    ), "StoryAccess should not exist for the given user and non-existent story_id."
 
 
 @pytest.mark.asyncio
-async def test_check_status_started_story(session: AsyncSession, mock_user: User):
-    """
-    Test case for a story that has been started but not finished.
-    Expected: Status is 'started' with the current attempt data.
-    """
-    result = await check_status(
-        db=session, user=mock_user, story_id=2
-    )  # Started story_id
-    assert result["status"] == "started"
-    assert result["story_access"]["purchase_date"] is not None
-    assert result["story_access"]["current_attempt"] is not None
-    assert result["story_access"]["current_attempt"].finish_date is None
+async def test_get_story_access_by_attempt(session: AsyncSession, mock_user: User):
+    # Pobierz przykładowego użytkownika i próbę z danych testowych
+    attempt_id = 1  # Zakładamy, że attempt_id 1 istnieje w test_data.json
+
+    # Wywołanie testowanej funkcji
+    story_access = await get_story_access_by_attempt(session, attempt_id, mock_user)
+
+    # Sprawdzenie poprawności wyniku
+    assert (
+        story_access is not None
+    ), "StoryAccess should exist for the given user and attempt_id."
+    assert isinstance(
+        story_access, StoryAccess
+    ), "Returned object should be an instance of StoryAccess."
+    assert story_access.user.id == mock_user.id, "User ID should match the given user."
 
 
 @pytest.mark.asyncio
-async def test_check_status_finished_story(session: AsyncSession, mock_user: User):
-    """
-    Test case for a story that has been started and finished.
-    Expected: Status is 'finished' with the current attempt data.
-    """
-    result = await check_status(
-        db=session, user=mock_user, story_id=1
-    )  # Finished story_id
-    assert result["status"] == "finished"
-    assert result["story_access"]["purchase_date"] is not None
-    assert result["story_access"]["current_attempt"] is not None
-    assert result["story_access"]["current_attempt"].finish_date is not None
+async def test_get_story_access_by_attempt_nonexistent_attempt(
+    session: AsyncSession, mock_user: User
+):
+    # Pobierz przykładowego użytkownika i nieistniejącą próbę
+    attempt_id = 9999  # Zakładamy, że takie attempt_id nie istnieje
+
+    # Wywołanie testowanej funkcji
+    story_access = await get_story_access_by_attempt(session, attempt_id, mock_user)
+
+    # Sprawdzenie poprawności wyniku
+    assert (
+        story_access is None
+    ), "StoryAccess should not exist for the given user and non-existent attempt_id."
 
 
 @pytest.mark.asyncio
-async def test_check_status_user_no_access(session: AsyncSession, mock_user: User):
-    """
-    Test case where user has no access to the story.
-    Expected: Status is 'new' with no access or attempts.
-    """
-    result = await check_status(
-        db=session, user=mock_user, story_id=999
-    )  # Non-purchased story
-    assert result is None
+async def test_get_story_access_by_attempt_invalid_user(
+    session: AsyncSession, mock_user: User
+):
+    # Pobierz przykładową próbę i użytkownika, który nie ma dostępu
+    attempt_id = 4  # Zakładamy, że attempt_id 1 istnieje w test_data.json
+
+    # Wywołanie testowanej funkcji
+    story_access = await get_story_access_by_attempt(session, attempt_id, mock_user)
+
+    # Sprawdzenie poprawności wyniku
+    assert (
+        story_access is None
+    ), "StoryAccess should not exist for a user without access."
