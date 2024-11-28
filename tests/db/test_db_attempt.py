@@ -8,30 +8,37 @@ from schemas.stage import StageDisplay
 
 
 @pytest.mark.asyncio
-async def test_get_attempt_valid_data(session: AsyncSession, mock_user: User):
-    """
-    Test case for a valid attempt using data from test_data.json.
-    Expected: Data matches the AttemptDisplay schema.
-    """
-    # Wybieramy attempt_id zgodne z test_data.json
-    attempt_id = 1  # Attempt dla użytkownika user1@example.com
-    result = await get_attempt(attempt_id=attempt_id, db=session)
+async def test_get_active_attempt(session: AsyncSession, mock_user: User):
+    # Assume story_access_id exists in test data
+    story_access_id = 1  # Example ID for StoryAccess
 
-    # Sprawdzenie danych
-    assert result is not None
-    assert isinstance(result, dict)
-    assert "start_date" in result
-    assert "stage" in result
+    # Call the function to test
+    active_attempt = await get_active_attempt(session, story_access_id)
 
-    # Sprawdzenie zgodności z AttemptDisplay
-    attempt_display = AttemptDisplay(**result)
-    assert attempt_display.start_date is not None
-    assert isinstance(attempt_display.stage, StageDisplay)
-    assert isinstance(attempt_display.stage.name, str)
-    assert isinstance(attempt_display.stage.level, int)
-    assert isinstance(attempt_display.stage.question, str)
-    assert attempt_display.stage.level == 1
-    assert attempt_display.stage.name == "First Challenge"
+    # Validate the result
+    assert (
+        active_attempt is not None
+    ), "Active attempt should be returned for a valid story_access_id."
+    assert isinstance(
+        active_attempt, Attempt
+    ), "Returned object should be an instance of Attempt."
+    assert (
+        active_attempt.story_access_id == story_access_id
+    ), "StoryAccess ID should match the provided ID."
+
+
+@pytest.mark.asyncio
+async def test_get_active_attempt_no_attempt(session: AsyncSession, mock_user: User):
+    # Use a story_access_id that doesn't have any associated attempts
+    story_access_id = 9999  # Example of a non-existent or unused ID
+
+    # Call the function to test
+    active_attempt = await get_active_attempt(session, story_access_id)
+
+    # Validate the result
+    assert (
+        active_attempt is None
+    ), "No active attempt should be returned for a non-existent story_access_id."
 
 
 @pytest.mark.asyncio
