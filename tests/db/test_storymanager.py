@@ -1,8 +1,9 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.models import User, Story, StoryAccess, Attempt
+from db.models import User, Story, StoryAccess, Attempt, HintsAttempt, Hint
 from db.storymanager import StoryManager
 from schemas.access import StatusEnum, StoryStatus, StoryAccessBase, AttemptBase
+from schemas.attempt import HintBase, HintsDisplay
 
 
 @pytest.mark.asyncio
@@ -292,3 +293,96 @@ async def test_check_access_ended_story(story_manager: StoryManager):
         result.story_access.current_attempt, AttemptBase
     ), "Current attempt should be an instance of AttemptBase."
     assert result.story_access.current_attempt is not None
+
+
+@pytest.mark.asyncio
+async def test_get_hints_valid_attempt(story_manager: StoryManager):
+    """
+    Test get_hints for a valid attempt with associated hints.
+    """
+    # Set up the story_manager state
+    await story_manager.load_by_story_id(1)
+
+    # Call the method
+    result = await story_manager.get_hints()
+
+    # Validate the result
+    assert isinstance(
+        result, HintsDisplay
+    ), "Result should be an instance of HintsDisplay."
+    assert len(result.hints) > 0, "Hints should not be empty for a valid attempt."
+    assert all(
+        isinstance(hint, HintBase) for hint in result.hints
+    ), "All items in hints should be instances of HintBase."
+    assert (
+        result.hints[0].text == "Add some numers"
+    ), "Hint text should match the database data."
+    assert (
+        result.hints[0].trigger == "give me hint 3"
+    ), "Hint trigger should match the database data."
+
+
+@pytest.mark.asyncio
+async def test_get_hints_no_hints(story_manager: StoryManager):
+    """
+    Test get_hints for a valid attempt with no associated hints.
+    """
+    # Set up the story_manager state
+    await story_manager.load_by_story_id(2)
+    result = await story_manager.get_hints()
+    # Validate the result
+    assert isinstance(
+        result, HintsDisplay
+    ), "Result should be an instance of HintsDisplay."
+    assert (
+        len(result.hints) == 0
+    ), "Hints should be empty for an attempt with no associated hints."
+
+
+@pytest.mark.asyncio
+async def test_get_hints_no_attempt(story_manager: StoryManager):
+    """
+    Test get_hints when no current_attempt is set.
+    """
+    await story_manager.load_by_story_id(3)
+
+    # Call the method and expect an exception
+    with pytest.raises(
+        AttributeError, match=".*'NoneType' object has no attribute 'id'.*"
+    ):
+        await story_manager.get_hints()
+
+
+@pytest.mark.asyncio
+async def test_buy_story_success(story_manager: StoryManager, session: AsyncSession):
+    """
+    Test successful purchase of a story.
+    """
+    await story_manager.load_by_story_id(6)
+
+    # Set up the user's gold balance
+    # Call the method
+    await story_manager.buy_story()
+
+    # Validate the result
+    assert (
+        story_manager.user.gold == 950
+    ), "Gold should be deducted from the user's account."
+    assert story_manager.story_access is not None, "StoryAccess should be created."
+    assert (
+        story_manager.story_status == StatusEnum.purchased
+    ), "Story status should be 'purchased'."
+
+
+@pytest.mark.asyncio
+async def test_buy_story_insufficient_gold(
+    story_manager: StoryManager, session: AsyncSession
+):
+    """
+    Test purchase of a story when the user has insufficient gold.
+    """
+    await story_manager.load_by_story_id(7)
+
+    # Call the method and expect a ValueError
+    with pytest.raises(ValueError, match="Insufficient gold to purchase the story."):
+        await story_manager.buy_story()

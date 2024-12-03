@@ -5,7 +5,8 @@
       "username": "user1",
       "hashed_password": "hashed1",
       "is_active": true,
-      "is_verified": true
+      "is_verified": true,
+      "gold": 1000
     },
     {
       "email": "user2@example.com",
@@ -67,6 +68,22 @@
       "difficulty": "Easy",
       "rating": 2.6,
       "cost": 5
+    },
+    {
+      "title": "Story to buy",
+      "description": "story for testing",
+      "type": "Test type",
+      "difficulty": "Easy",
+      "rating": 1,
+      "cost": 50
+    },
+    {
+      "title": "Story to buy to expensive",
+      "description": "story for testing",
+      "type": "Test type",
+      "difficulty": "Easy",
+      "rating": 1,
+      "cost": 5000
     }
 
   ],
@@ -133,6 +150,13 @@
       "question": "before mate",
       "password": "check",
       "story_title": "Chess Story2"
+    },
+    {
+      "level": 1,
+      "name": "Initial test to buy",
+      "question": "write a test",
+      "password": "test",
+      "story_title": "Story to buy"
     }
   ],
   "story_accesses": [
@@ -229,12 +253,12 @@
     {
       "text": "Add some numers",
       "trigger": "give me hint 3",
-      "stage_name": "First Challenge"
+      "stage_name": "Second Challenge"
     },
     {
       "text": "you are too stupid",
       "trigger": "give me hint 4",
-      "stage_name": "First Challenge"
+      "stage_name": "Second Challenge"
     }
   ],
   "password_attempts": [
@@ -278,15 +302,15 @@
     {
       "attempt_story_access_user_email": "user1@example.com",
       "attempt_story_access_story_title": "Adventure Story",
-      "attempt_stage_name": "First Challenge",
-      "hint_text": "Think carefully.",
+      "attempt_stage_name": "Second Challenge",
+      "hint_text": "Add some numers",
       "enter_date": "2023-12-12T13:07:00"
     },
     {
       "attempt_story_access_user_email": "user1@example.com",
       "attempt_story_access_story_title": "Adventure Story",
-      "attempt_stage_name": "First Challenge",
-      "hint_text": "Use mathematical skills",
+      "attempt_stage_name": "Second Challenge",
+      "hint_text": "you are too stupid",
       "enter_date": "2023-12-12T13:07:30"
     }
   ]

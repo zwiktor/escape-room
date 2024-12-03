@@ -58,16 +58,16 @@ async def test_get_hints_with_valid_attempt(session: AsyncSession, mock_user: Us
     Test get_hints for a valid attempt with associated hints.
     """
     # Use an attempt_id that has hints in the test database
-    valid_attempt_id = 1  # Replace with a valid attempt ID from test data
+    valid_attempt_id = 2  # Replace with a valid attempt ID from test data
 
     # Call the function
-    hints = await get_hints(valid_attempt_id, db=session)
+    hints = await get_hints(db=session, attempt_id=valid_attempt_id)
 
     # Validate the results
     assert hints is not None, "Hints should be returned for a valid attempt_id."
     assert len(hints) > 0, "At least one hint should exist for the valid attempt_id."
     assert all(
-        isinstance(hint, HintsAttempt) for hint in hints
+        isinstance(hint, Hint) for hint in hints
     ), "All returned items should be instances of HintsAttempt."
 
 
@@ -77,10 +77,10 @@ async def test_get_hints_with_no_hints(session: AsyncSession, mock_user: User):
     Test get_hints for a valid attempt with no associated hints.
     """
     # Use an attempt_id that exists but has no hints in the test database
-    attempt_id_with_no_hints = 2  # Replace with an attempt ID that has no hints
+    attempt_id_with_no_hints = 3  # Replace with an attempt ID that has no hints
 
     # Call the function
-    hints = await get_hints(attempt_id_with_no_hints, db=session)
+    hints = await get_hints(db=session, attempt_id=attempt_id_with_no_hints)
 
     # Validate the results
     assert (
@@ -97,7 +97,7 @@ async def test_get_hints_with_invalid_attempt(session: AsyncSession, mock_user: 
     invalid_attempt_id = 9999  # Non-existent attempt ID
 
     # Call the function
-    hints = await get_hints(invalid_attempt_id, db=session)
+    hints = await get_hints(db=session, attempt_id=invalid_attempt_id)
 
     # Validate the results
     assert hints == [], "Hints should be an empty list for a non-existent attempt_id."
