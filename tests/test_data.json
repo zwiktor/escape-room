@@ -59,7 +59,16 @@
       "difficulty": "Easy",
       "rating": 2.6,
       "cost": 5
+    },
+    {
+      "title": "No access Chess Story2",
+      "description": "A logic puzzle story. Again",
+      "type": "Boring Adventure",
+      "difficulty": "Easy",
+      "rating": 2.6,
+      "cost": 5
     }
+
   ],
   "stages": [
     {
@@ -110,6 +119,20 @@
       "question": "What is your quest for indiana?",
       "password": "treasure 2",
       "story_title": "Indiana jonse Story"
+    },
+    {
+      "level": 1,
+      "name": "First Chess quiz",
+      "question": "what is hard piece",
+      "password": "rook",
+      "story_title": "Chess Story2"
+    },
+     {
+      "level": 2,
+      "name": "Second Chess quiz",
+      "question": "before mate",
+      "password": "check",
+      "story_title": "Chess Story2"
     }
   ],
   "story_accesses": [
@@ -137,6 +160,11 @@
       "user_email": "user2@example.com",
       "story_title": "Indiana jonse Story",
       "purchase_date": "2023-11-12T11:00:00"
+    },
+    {
+      "user_email": "user1@example.com",
+      "story_title": "Chess Story2",
+      "purchase_date": "2023-10-12T16:00:00"
     }
   ],
   "attempts": [
@@ -171,6 +199,20 @@
       "story_access_story_title": "Indiana jonse Story",
       "stage_name": "First Challenge Indiana",
       "start_date": "2023-11-12T14:00:00"
+    },
+    {
+      "story_access_user_email": "user1@example.com",
+      "story_access_story_title": "Chess Story2",
+      "stage_name": "First Chess quiz",
+      "start_date": "2023-11-12T14:00:00",
+      "finish_date": "2023-11-12T14:30:00"
+    },
+    {
+      "story_access_user_email": "user1@example.com",
+      "story_access_story_title": "Chess Story2",
+      "stage_name": "Second Chess quiz",
+      "start_date": "2023-11-12T14:30:00",
+      "finish_date": "2023-11-12T14:50:00"
     }
   ],
   "hints": [

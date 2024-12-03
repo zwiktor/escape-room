@@ -18,7 +18,7 @@ async def test_get_all_stories_success(session: AsyncSession):
 
     assert stories is not None
 
-    assert len(stories) == 4
+    assert len(stories) == 5
     assert stories[0].title == "Adventure Story"
     assert stories[2].difficulty == "Easy"
     assert all(isinstance(story, Story) for story in stories)

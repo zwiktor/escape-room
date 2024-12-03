@@ -22,5 +22,6 @@ async def get_story_access_by_attempt(
         await db.refresh(attempt, ["access"])
         story_access = attempt.access
         if story_access.user_id == user.id:
+            await db.refresh(story_access, ["story"])
             return story_access
     return None

@@ -21,6 +21,7 @@ class StoryManager:
         self.story_access: Optional[StoryAccess] = None
         self.current_attempt: Optional[Attempt] = None
         self.story_status: Optional[StatusEnum] = StatusEnum.new
+        self.attempt_finished: bool = False
 
     async def load_by_story_id(self, story_id: int):
         """
@@ -60,7 +61,12 @@ class StoryManager:
             raise ValueError(f"Attempt - {attempt_id} does not exist")
 
         self.story = self.story_access.story
-        self.current_attempt = await get_attempt_by_id(self.db, attempt_id)
+        self.current_attempt = await get_active_attempt(self.db, self.story_access.id)
+
+        # Sytuacja w której zostanie podany attempt_id który został już rozwiązany
+        # Należy przenieść historię do aktualnego lub stowrzyć stronę ze wskazaniem na aktualny
+        if self.current_attempt.id != attempt_id:
+            self.attempt_finished = True
 
         if self.current_attempt.finish_date:
             self.story_status = StatusEnum.ended
@@ -88,6 +94,7 @@ class StoryManager:
                         story_access_id=self.story_access.id,
                         stage_id=self.current_attempt.stage_id,
                         start_date=self.current_attempt.start_date,
+                        finish_date=self.current_attempt.finish_date,
                     ),
                 ),
             )
