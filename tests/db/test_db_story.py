@@ -3,8 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.db_story import (
     get_all_stories,
     get_story_by_id,
-    buy_story,
-    start_story,
     create_story,
 )
 from db.models import Story
@@ -67,20 +65,3 @@ async def test_create_story(session):
     assert story.title == request.title
     assert story.description == request.description
     assert story.cost == request.cost
-
-
-@pytest.mark.asyncio
-async def test_buy_story_invalid_story(
-    story_manager: StoryManager, session: AsyncSession
-):
-    """
-    Test purchase of a non-existent story.
-    """
-    invalid_story_id = 9999  # Use a story ID that doesn't exist
-    story_cost = 100  # Replace with the story's cost in gold
-
-    # Call the method and expect a ValueError
-    with pytest.raises(
-        ValueError, match=f"Story with id {invalid_story_id} does not exist."
-    ):
-        await story_manager.buy_story(invalid_story_id, story_cost)

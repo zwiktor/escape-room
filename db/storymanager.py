@@ -127,7 +127,7 @@ class StoryManager:
         """
         # Check if the story exists
         if not self.story:
-            raise ValueError(f"Story with id {story_id} does not exist.")
+            raise ValueError(f"Story with id {self.story.id} does not exist.")
 
         # Check if the user already has access
         if self.story_access:
