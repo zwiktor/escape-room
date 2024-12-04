@@ -84,6 +84,30 @@
       "difficulty": "Easy",
       "rating": 1,
       "cost": 5000
+    },
+    {
+      "title": "Story to test start by query",
+      "description": "story for testing",
+      "type": "Test type",
+      "difficulty": "Easy",
+      "rating": 5,
+      "cost": 12
+    },
+    {
+      "title": "Story with no acces for user",
+      "description": "story for testing",
+      "type": "Test type",
+      "difficulty": "Easy",
+      "rating": 20,
+      "cost": 12
+    },
+    {
+      "title": "Story with no stage for tests",
+      "description": "story for testing",
+      "type": "Test type",
+      "difficulty": "Easy",
+      "rating": 20,
+      "cost": 13
     }
 
   ],
@@ -157,6 +181,13 @@
       "question": "write a test",
       "password": "test",
       "story_title": "Story to buy"
+    },
+    {
+      "level": 1,
+      "name": "Initial test to start query",
+      "question": "write a test",
+      "password": "test",
+      "story_title": "Story to test start by query"
     }
   ],
   "story_accesses": [
@@ -189,7 +220,18 @@
       "user_email": "user1@example.com",
       "story_title": "Chess Story2",
       "purchase_date": "2023-10-12T16:00:00"
+    },
+    {
+      "user_email": "user1@example.com",
+      "story_title": "Story to test start by query",
+      "purchase_date": "2024-10-12T16:00:00"
+    },
+    {
+      "user_email": "user1@example.com",
+      "story_title": "Story with no stage for tests",
+      "purchase_date": "2024-10-12T16:00:00"
     }
+
   ],
   "attempts": [
     {

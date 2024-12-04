@@ -386,3 +386,55 @@ async def test_buy_story_insufficient_gold(
     # Call the method and expect a ValueError
     with pytest.raises(ValueError, match="Insufficient gold to purchase the story."):
         await story_manager.buy_story()
+
+
+@pytest.mark.asyncio
+async def test_start_story_create_attempt(
+    story_manager: StoryManager, session: AsyncSession
+):
+    """
+    Test starting a story by creating the first attempt.
+    """
+    # Set up the StoryManager state
+    await story_manager.load_by_story_id(8)
+    await story_manager.start_story()
+
+    assert (
+        story_manager.current_attempt is not None
+    ), "Current attempt should be created."
+    assert (
+        story_manager.current_attempt.id == 8 is not None
+    ), "Current attempt should be created."
+    assert (
+        story_manager.current_attempt.stage_id == 11
+    ), "Stage ID should match the story's first stage ID."
+    assert (
+        story_manager.story_status == StatusEnum.started
+    ), "Story status should be 'started'."
+
+
+@pytest.mark.asyncio
+async def test_start_story_with_existing_attempt(
+    story_manager: StoryManager, session: AsyncSession
+):
+    """
+    Test starting a story when an active attempt already exists.
+    """
+    # Set up the StoryManager state
+    await story_manager.load_by_story_id(1)
+
+    with pytest.raises(ValueError, match="User has already started this story"):
+        await story_manager.start_story()
+
+
+@pytest.mark.asyncio
+async def test_start_story_no_access(story_manager: StoryManager):
+    """
+    Test starting a story when the user does not have access.
+    """
+    # Ensure the user does not have access
+    await story_manager.load_by_story_id(9)
+
+    # Call the method and expect a ValueError
+    with pytest.raises(ValueError, match="User does not have access to this story."):
+        await story_manager.start_story()

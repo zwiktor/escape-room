@@ -33,13 +33,16 @@ async def create_first_attempt(db: AsyncSession, story_access: StoryAccess) -> A
     :return: The newly created Attempt.
     :raises Exception: If the attempt creation fails.
     """
-    first_stage_id = get_first_instance(
+    first_stage = await get_first_instance(
         db, Stage, order_by="id", story_id=story_access.story_id
     )
+    if not first_stage:
+        raise ValueError("There is no stage for the Story")
+
     try:
         new_attempt = Attempt(
             story_access_id=story_access.id,
-            stage_id=first_stage_id,
+            stage_id=first_stage.id,
         )
         db.add(new_attempt)
         await db.commit()

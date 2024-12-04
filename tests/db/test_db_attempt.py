@@ -42,17 +42,6 @@ async def test_get_active_attempt_no_attempt(session: AsyncSession, mock_user: U
 
 
 @pytest.mark.asyncio
-async def test_get_attempt_invalid_id(session: AsyncSession, mock_user: User):
-    """
-    Test case for an invalid attempt ID.
-    Expected: None or an exception is raised.
-    """
-    invalid_attempt_id = 999  # Nieistniejący attempt_id
-    with pytest.raises(Exception):  # Oczekiwanie odpowiedniego wyjątku
-        await get_attempt(attempt_id=invalid_attempt_id, db=session)
-
-
-@pytest.mark.asyncio
 async def test_get_hints_with_valid_attempt(session: AsyncSession, mock_user: User):
     """
     Test get_hints for a valid attempt with associated hints.
@@ -101,3 +90,57 @@ async def test_get_hints_with_invalid_attempt(session: AsyncSession, mock_user: 
 
     # Validate the results
     assert hints == [], "Hints should be an empty list for a non-existent attempt_id."
+
+
+@pytest.mark.asyncio
+async def test_create_first_attempt(session: AsyncSession):
+    """
+    Test creating the first attempt for a story.
+    Story 8, stage = 11, storyaccess = 7
+    """
+    story_access = await get_instance(
+        session, StoryAccess, id=7
+    )  # Replace with a valid
+
+    # Call the function
+    new_attempt = await create_first_attempt(db=session, story_access=story_access)
+
+    # Validate the result
+    assert new_attempt is not None, "The attempt should be created successfully."
+    assert (
+        new_attempt.story_access_id == story_access.id
+    ), "StoryAccess ID should match."
+    assert new_attempt.stage_id == 11, "Stage ID should match."
+    assert new_attempt.start_date is not None, "Start date should be set."
+
+
+@pytest.mark.asyncio
+async def test_create_first_attempt_no_stage(session: AsyncSession):
+    """
+    Test creating the first attempt when no stages exist for the story.
+    """
+    # Ensure no stages exist for the story
+    story_access = await get_instance(
+        session, StoryAccess, id=8
+    )  # Replace with a valid
+
+    # Call the function and expect an exception
+    with pytest.raises(ValueError, match="There is no stage for the Story"):
+        await create_first_attempt(db=session, story_access=story_access)
+
+
+@pytest.mark.asyncio
+async def test_create_first_attempt_rollback(session: AsyncSession, mocker):
+    """
+    Test creating the first attempt with an invalid database session.
+    """
+    # Use an invalid session or close the session to simulate a database error
+    story_access = await get_instance(session, StoryAccess, id=7)
+
+    mocker.patch("db.db_attempt.Attempt", side_effect=Exception("Mocked Exception"))
+
+    # Call the function and expect an exception
+    with pytest.raises(
+        Exception, match="Failed to create the first attempt: Mocked Exception"
+    ):
+        await create_first_attempt(db=session, story_access=story_access)

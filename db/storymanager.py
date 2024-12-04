@@ -4,7 +4,7 @@ from db.models import User, Story, Attempt, StoryAccess
 from schemas.access import StoryStatus, StatusEnum, StoryAccessBase, AttemptBase
 from schemas.attempt import HintsDisplay, HintBase
 from typing import Optional
-from db.db_attempt import get_active_attempt, get_hints
+from db.db_attempt import get_active_attempt, get_hints, create_first_attempt
 from db.db_access import get_story_access_by_attempt, get_story_access
 from db.db_story import get_story_by_id
 from db.db_queries import convert_to_pydantic
@@ -171,12 +171,13 @@ class StoryManager:
 
         # Check if an active attempt already exists
         if self.current_attempt:
-            return
+            raise ValueError("User has already started this story")
 
         self.current_attempt = await create_first_attempt(
             db=self.db,
-            story_access_id=self.story_access,
+            story_access=self.story_access,
         )
+        self.story_status = StatusEnum.started
 
     async def check_password(self):
         pass
