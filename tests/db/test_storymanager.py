@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.models import User, Story, StoryAccess, Attempt, HintsAttempt, Hint
 from db.storymanager import StoryManager
 from schemas.access import StatusEnum, StoryStatus, StoryAccessBase, AttemptBase
-from schemas.attempt import HintBase, HintsDisplay
+from schemas.attempt import HintBase, HintsDisplay, PasswordCheckDisplay
 
 
 @pytest.mark.asyncio
@@ -389,6 +389,20 @@ async def test_buy_story_insufficient_gold(
 
 
 @pytest.mark.asyncio
+async def test_buy_story_users_already_have_access(
+    story_manager: StoryManager, session: AsyncSession
+):
+    """
+    Test purchase of a story when the user has access to the story.
+    """
+    await story_manager.load_by_story_id(1)
+
+    # Call the method and expect a ValueError
+    with pytest.raises(ValueError, match="User already owns this story."):
+        await story_manager.buy_story()
+
+
+@pytest.mark.asyncio
 async def test_start_story_create_attempt(
     story_manager: StoryManager, session: AsyncSession
 ):
@@ -438,3 +452,119 @@ async def test_start_story_no_access(story_manager: StoryManager):
     # Call the method and expect a ValueError
     with pytest.raises(ValueError, match="User does not have access to this story."):
         await story_manager.start_story()
+
+
+@pytest.mark.asyncio
+async def test_validate_password_correct_password_with_next_stage(
+    story_manager: StoryManager,
+):
+    """
+    Test validate_password when the correct password unlocks the next stage.
+    """
+    password_attempt = "seek2"
+    await story_manager.load_by_attempt_id(2)
+    result = await story_manager.validate_password(password_attempt)
+
+    # Validate the result
+    assert (
+        result.message == "Gratulacje, to prawidlowa odpowiedz"
+    ), "Message should indicate the password was correct."
+    assert (
+        not result.new_hint
+    ), "new_hint should be False when no new hint is triggered."
+    assert (
+        result.next_attempt == 8
+    ), "next_attempt should contain the ID of the new attempt."
+    assert not result.end_story, "end_story should be False for intermediate stages."
+    assert isinstance(result, PasswordCheckDisplay)
+
+
+@pytest.mark.asyncio
+async def test_validate_password_correct_password_end_story(
+    story_manager: StoryManager,
+):
+    """
+    Test validate_password when the correct password ends the story.
+    """
+    password_attempt = "treasure 2"
+    await story_manager.load_by_attempt_id(4)
+    result = await story_manager.validate_password(password_attempt)
+
+    # Validate the result
+    assert (
+        result.message == "Gratulacje, historia zostala zakonczona"
+    ), "Message should indicate the story was completed."
+    assert (
+        not result.new_hint
+    ), "new_hint should be False when no new hint is triggered."
+    assert (
+        result.next_attempt is None
+    ), "next_attempt should be None at the end of the story."
+    assert result.end_story, "end_story should be True when the story is completed."
+
+
+@pytest.mark.asyncio
+async def test_validate_password_incorrect_password_no_hint(
+    story_manager: StoryManager,
+):
+    """
+    Test validate_password when the password is incorrect and no hint is triggered.
+    """
+    # Mock dependencies
+    password_attempt = "treasure 4"
+    await story_manager.load_by_attempt_id(4)
+    result = await story_manager.validate_password(password_attempt)
+
+    # Validate the result
+    assert (
+        result.message == "Nieprawidłowa odpowiedź, próbuj dalej"
+    ), "Message should indicate the stage is already solved for incorrect passwords."
+    assert (
+        not result.new_hint
+    ), "new_hint should be False when no new hint is triggered."
+    assert (
+        result.next_attempt is None
+    ), "next_attempt should be None for incorrect passwords."
+    assert not result.end_story, "end_story should be False for incorrect passwords."
+
+
+@pytest.mark.asyncio
+async def test_validate_password_trigger_existing_hint(story_manager: StoryManager):
+    """
+    Test validate_password when the password triggers a new hint.
+    """
+    password_attempt = "give me hint 3"
+    await story_manager.load_by_attempt_id(2)
+    result = await story_manager.validate_password(password_attempt)
+
+    # Validate the result
+    assert (
+        result.message == "Nieprawidłowa odpowiedź, próbuj dalej"
+    ), "Message should indicate a new hint was discovered."
+    assert (
+        not result.new_hint
+    ), "new_hint should be False when a hint was discovered eariler"
+    assert (
+        result.next_attempt is None
+    ), "next_attempt should be None when a hint is triggered."
+    assert not result.end_story, "end_story should be False when a hint is triggered."
+
+
+@pytest.mark.asyncio
+async def test_validate_password_trigger_hint(story_manager: StoryManager):
+    """
+    Test validate_password when the password triggers a new hint.
+    """
+    password_attempt = "give me hint 5"
+    await story_manager.load_by_attempt_id(2)
+    result = await story_manager.validate_password(password_attempt)
+
+    # Validate the result
+    assert (
+        result.message == "Nowa wskazowka zostala odkryta"
+    ), "Message should indicate a new hint was discovered."
+    assert result.new_hint, "new_hint should be True when a hint is triggered."
+    assert (
+        result.next_attempt is None
+    ), "next_attempt should be None when a hint is triggered."
+    assert not result.end_story, "end_story should be False when a hint is triggered."

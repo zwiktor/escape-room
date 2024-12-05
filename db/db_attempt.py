@@ -1,12 +1,22 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import User, Attempt, HintsAttempt, Hint, Stage, StoryAccess
+from db.models import (
+    User,
+    Attempt,
+    HintsAttempt,
+    Hint,
+    Stage,
+    StoryAccess,
+    PasswordAttempt,
+)
 from db.db_queries import (
     get_instance,
     get_instances,
     get_last_instance,
     get_first_instance,
+    create_instance,
 )
+from datetime import datetime
 
 
 async def get_active_attempt(db: AsyncSession, story_access_id: int):
@@ -51,3 +61,47 @@ async def create_first_attempt(db: AsyncSession, story_access: StoryAccess) -> A
     except Exception as e:
         await db.rollback()
         raise Exception(f"Failed to create the first attempt: {str(e)}")
+
+
+async def add_password_attempt(session: AsyncSession, attempt: Attempt, password: str):
+    return await create_instance(
+        session, PasswordAttempt, attempt_id=attempt.id, password=password
+    )
+
+
+async def check_new_hint(session: AsyncSession, attempt: Attempt, password: str):
+    hint = await get_instance(
+        session, Hint, stage_id=attempt.stage_id, trigger=password
+    )
+    if hint:
+        if not await get_instance(
+            session, HintsAttempt, attempt_id=attempt.id, hint_id=hint.id
+        ):
+            await create_instance(
+                session,
+                HintsAttempt,
+                attempt_id=attempt.id,
+                hint_id=hint.id,
+                enter_date=datetime.now(),
+            )
+            return True
+
+    return False
+
+
+async def finish_attempt(session: AsyncSession, attempt: Attempt):
+    attempt.finish_date = datetime.now()
+    await session.commit()
+    return attempt
+
+
+async def create_next_attempt(
+    session: AsyncSession, attempt: Attempt, next_stage: Stage
+):
+    return await create_instance(
+        session,
+        Attempt,
+        story_access_id=attempt.story_access_id,
+        stage_id=next_stage.id,
+        start_date=attempt.finish_date,
+    )

@@ -14,7 +14,7 @@ async def test_get_next_stage_existing(session: AsyncSession):
     Expected: The correct next stage is returned.
     """
     current_stage = await get_first_instance(session, Stage, "id", story_id=2)
-    next_stage = await get_next_stage(current_stage, session)
+    next_stage = await get_next_stage(session, current_stage)
 
     assert next_stage is not None
     assert next_stage.level == current_stage.level + 1
@@ -31,6 +31,6 @@ async def test_get_next_stage_nonexistent(session: AsyncSession):
     current_stage = await get_first_instance(
         session, Stage, "id", story_id=1, level=5
     )  # Assuming level 5 is the last
-    next_stage = await get_next_stage(current_stage, session)
+    next_stage = await get_next_stage(session, current_stage)
 
     assert next_stage is None

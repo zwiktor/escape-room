@@ -301,7 +301,13 @@
       "text": "you are too stupid",
       "trigger": "give me hint 4",
       "stage_name": "Second Challenge"
+    },
+    {
+      "text": "first hint in tests",
+      "trigger": "give me hint 5",
+      "stage_name": "Second Challenge"
     }
+
   ],
   "password_attempts": [
     {

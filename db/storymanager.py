@@ -1,13 +1,25 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from db.models import User, Story, Attempt, StoryAccess
-from schemas.access import StoryStatus, StatusEnum, StoryAccessBase, AttemptBase
-from schemas.attempt import HintsDisplay, HintBase
 from typing import Optional
-from db.db_attempt import get_active_attempt, get_hints, create_first_attempt
+
+from db.models import User, Story, Attempt, StoryAccess, Stage
+
+from db.db_attempt import (
+    get_active_attempt,
+    get_hints,
+    create_first_attempt,
+    add_password_attempt,
+    check_new_hint,
+    finish_attempt,
+    create_next_attempt,
+)
 from db.db_access import get_story_access_by_attempt, get_story_access
 from db.db_story import get_story_by_id
 from db.db_queries import convert_to_pydantic
+from db.db_stage import get_next_stage, get_stage_by_attempt
+
+from schemas.access import StoryStatus, StatusEnum, StoryAccessBase, AttemptBase
+from schemas.attempt import HintsDisplay, HintBase, AttemptDisplay, PasswordCheckDisplay
 
 
 class StoryManager:
@@ -23,6 +35,7 @@ class StoryManager:
         self.story: Optional[Story] = None
         self.story_access: Optional[StoryAccess] = None
         self.current_attempt: Optional[Attempt] = None
+        self.stage: Optional[Stage] = None
         self.story_status: Optional[StatusEnum] = StatusEnum.new
         self.attempt_finished: bool = False
 
@@ -45,6 +58,7 @@ class StoryManager:
                 self.db, self.story_access.id
             )
             if self.current_attempt:
+                self.stage = await get_stage_by_attempt(self.db, self.current_attempt)
                 self.story_status = StatusEnum.started
                 if self.current_attempt.finish_date:
                     self.story_status = StatusEnum.ended
@@ -65,7 +79,7 @@ class StoryManager:
 
         self.story = self.story_access.story
         self.current_attempt = await get_active_attempt(self.db, self.story_access.id)
-
+        self.stage = await get_stage_by_attempt(self.db, self.current_attempt)
         # Sytuacja w której zostanie podany attempt_id który został już rozwiązany
         # Należy przenieść historię do aktualnego lub stowrzyć stronę ze wskazaniem na aktualny
         if self.current_attempt.id != attempt_id:
@@ -125,9 +139,6 @@ class StoryManager:
         :raises ValueError: If the user does not have enough gold.
         :raises Exception: If the story access creation fails.
         """
-        # Check if the story exists
-        if not self.story:
-            raise ValueError(f"Story with id {self.story.id} does not exist.")
 
         # Check if the user already has access
         if self.story_access:
@@ -136,27 +147,20 @@ class StoryManager:
         if self.user.gold < self.story.cost:
             raise ValueError("Insufficient gold to purchase the story.")
 
-        try:
-            # Deduct the cost from the user's gold
-            self.user.gold -= self.story.cost
-            self.db.add(self.user)
+        # Deduct the cost from the user's gold
+        self.user.gold -= self.story.cost
+        self.db.add(self.user)
 
-            # Create a new StoryAccess record
-            new_access = StoryAccess(user_id=self.user.id, story_id=self.story.id)
-            self.db.add(new_access)
+        # Create a new StoryAccess record
+        new_access = StoryAccess(user_id=self.user.id, story_id=self.story.id)
+        self.db.add(new_access)
 
-            # Commit the transaction
-            await self.db.commit()
+        # Commit the transaction
+        await self.db.commit()
 
-            # Update the StoryManager state
-            self.story_access = new_access
-            self.story_status = StatusEnum.purchased
-        except IntegrityError:
-            await self.db.rollback()
-            raise Exception("Failed to create story access due to a database error.")
-        except Exception as e:
-            await self.db.rollback()
-            raise Exception(f"An unexpected error occurred: {str(e)}")
+        # Update the StoryManager state
+        self.story_access = new_access
+        self.story_status = StatusEnum.purchased
 
     async def start_story(self):
         """
@@ -179,11 +183,42 @@ class StoryManager:
         )
         self.story_status = StatusEnum.started
 
-    async def check_password(self):
-        pass
+    async def validate_password(self, password: str) -> PasswordCheckDisplay:
+        password_result = PasswordCheckDisplay(
+            message="Nieprawidłowa odpowiedź, próbuj dalej",
+            new_hint=False,
+            next_attempt=None,
+            end_story=False,
+        )
 
-    async def move_to_next_stage(self):
-        pass
+        # Dodaje nowe hasło do histori nie zależnie od poprawności
+        await add_password_attempt(self.db, self.current_attempt, password)
+
+        # Sprawdza, czy wprowadzone hasło wyzwala jakąś wskazówkę
+        if await check_new_hint(self.db, self.current_attempt, password):
+            password_result.new_hint = True
+            password_result.message = "Nowa wskazowka zostala odkryta"
+
+        # Sprawdza, czy wprowadzone hasło jest prawidłowe. Jeżeli jest kolejny etap to wysyła id,
+        # a jeżeli niema to kończy historię
+        # if await check_stage_password(self.db, self.current_attempt.stage, password):
+        if self.stage.password == password:
+            self.current_attempt = await finish_attempt(self.db, self.current_attempt)
+            next_stage = await get_next_stage(self.db, self.current_attempt.stage)
+            if next_stage:
+                new_attemp = await create_next_attempt(
+                    self.db,
+                    self.current_attempt,
+                    next_stage,
+                )
+                password_result.next_attempt = new_attemp.id
+                password_result.message = "Gratulacje, to prawidlowa odpowiedz"
+            else:
+
+                password_result.message = "Gratulacje, historia zostala zakonczona"
+                password_result.end_story = True
+
+        return password_result
 
     async def get_hints(self) -> HintsDisplay:
         hints = await get_hints(self.db, self.current_attempt.id)
