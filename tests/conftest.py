@@ -2,6 +2,7 @@ import pytest
 import json
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from db.database import get_async_session
 from db.models import *
 from users.manager import get_user_manager
 from pathlib import Path
@@ -157,6 +158,18 @@ async def session():
     async with AsyncSessionLocal() as session:
         yield session
         await session.rollback()
+
+
+# Test-specific get_async_session function
+async def get_test_async_session() -> AsyncSession:
+    async with AsyncSessionLocal() as session:
+        yield session
+
+
+# Override the application's get_async_session dependency
+@pytest_asyncio.fixture(scope="function", autouse=True)
+def override_get_async_session():
+    app.dependency_overrides[get_async_session] = get_test_async_session
 
 
 @pytest_asyncio.fixture
