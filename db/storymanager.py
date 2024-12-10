@@ -1,8 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from typing import Optional
-
+from typing import Optional, List
+from fastapi import Depends
 from db.models import User, Story, Attempt, StoryAccess, Stage
+from db.database import get_async_session
+from users.manager import current_active_user
 
 from db.db_attempt import (
     get_active_attempt,
@@ -14,7 +16,7 @@ from db.db_attempt import (
     create_next_attempt,
 )
 from db.db_access import get_story_access_by_attempt, get_story_access
-from db.db_story import get_story_by_id
+from db.db_story import get_story_by_id, get_all_stories
 from db.db_queries import convert_to_pydantic
 from db.db_stage import get_next_stage, get_stage_by_attempt
 
@@ -223,3 +225,19 @@ class StoryManager:
     async def get_hints(self) -> HintsDisplay:
         hints = await get_hints(self.db, self.current_attempt.id)
         return HintsDisplay(hints=convert_to_pydantic(hints, HintBase))
+
+    async def get_stories(self) -> List[Story]:
+        stories = await get_all_stories(self.db)
+        return stories
+
+
+async def get_story_manager(
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user),
+) -> StoryManager:
+    """
+    Dependency to provide a StoryManager instance, with error handling.
+    """
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized user")
+    return StoryManager(session=session, current_user=user)

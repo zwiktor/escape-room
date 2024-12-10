@@ -9,6 +9,7 @@ from schemas.access import StoryAccessBase, StoryStatus, AttemptBase, AccessBase
 from db import db_story
 from db import db_access
 from db.models import User
+from db.storymanager import get_story_manager, StoryManager
 
 from users.manager import current_active_user
 
