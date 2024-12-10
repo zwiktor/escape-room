@@ -12,6 +12,7 @@ class LoginRequest(BaseModel):
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
     username: str
+    gold: Optional[int]
 
 
 class UserCreate(schemas.BaseUserCreate):
@@ -20,3 +21,4 @@ class UserCreate(schemas.BaseUserCreate):
 
 class UserUpdate(schemas.BaseUserUpdate):
     username: Optional[str]
+    gold: Optional[int]

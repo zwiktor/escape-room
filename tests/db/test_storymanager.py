@@ -5,6 +5,14 @@ from db.storymanager import StoryManager
 from schemas.access import StatusEnum, StoryStatus, StoryAccessBase, AttemptBase
 from schemas.attempt import HintBase, HintsDisplay, PasswordCheckDisplay
 
+from exceptions.exceptions import (
+    EntityDoesNotExistError,
+    StoryAlreadyStartedError,
+    StoryAlreadyOwnedError,
+    InsufficientGoldError,
+    ServiceError,
+)
+
 
 @pytest.mark.asyncio
 async def test_load_by_story_id_with_access(
@@ -80,7 +88,7 @@ async def test_load_by_story_id_with_invalid_story_id(
     story_id = 9999
 
     # Call the method chach error if storyid is invalid
-    with pytest.raises(ValueError):
+    with pytest.raises(EntityDoesNotExistError):
         await story_manager.load_by_story_id(story_id)
 
 
@@ -185,7 +193,7 @@ async def test_load_by_attempt_id_invalid_attempt(
 
     # Call the method and expect a ValueError
     with pytest.raises(
-        ValueError, match=f"Attempt - {invalid_attempt_id} does not exist"
+        EntityDoesNotExistError, match=f"Attempt - {invalid_attempt_id} does not exist"
     ):
         await story_manager.load_by_attempt_id(invalid_attempt_id)
 
@@ -200,7 +208,9 @@ async def test_load_by_attempt_id_no_access(
     attempt_id = 5
 
     # Call the method and expect a ValueError
-    with pytest.raises(ValueError, match=f"Attempt - {attempt_id} does not exist"):
+    with pytest.raises(
+        EntityDoesNotExistError, match=f"Attempt - {attempt_id} does not exist"
+    ):
         await story_manager.load_by_attempt_id(attempt_id)
 
 
@@ -384,7 +394,9 @@ async def test_buy_story_insufficient_gold(
     await story_manager.load_by_story_id(7)
 
     # Call the method and expect a ValueError
-    with pytest.raises(ValueError, match="Insufficient gold to purchase the story."):
+    with pytest.raises(
+        InsufficientGoldError, match="Insufficient gold to purchase the story."
+    ):
         await story_manager.buy_story()
 
 
@@ -398,7 +410,7 @@ async def test_buy_story_users_already_have_access(
     await story_manager.load_by_story_id(1)
 
     # Call the method and expect a ValueError
-    with pytest.raises(ValueError, match="User already owns this story."):
+    with pytest.raises(StoryAlreadyOwnedError, match="User already owns this story."):
         await story_manager.buy_story()
 
 
@@ -437,7 +449,9 @@ async def test_start_story_with_existing_attempt(
     # Set up the StoryManager state
     await story_manager.load_by_story_id(1)
 
-    with pytest.raises(ValueError, match="User has already started this story"):
+    with pytest.raises(
+        StoryAlreadyStartedError, match="User has already started this story"
+    ):
         await story_manager.start_story()
 
 
@@ -450,7 +464,9 @@ async def test_start_story_no_access(story_manager: StoryManager):
     await story_manager.load_by_story_id(9)
 
     # Call the method and expect a ValueError
-    with pytest.raises(ValueError, match="User does not have access to this story."):
+    with pytest.raises(
+        EntityDoesNotExistError, match="User does not have access to this story."
+    ):
         await story_manager.start_story()
 
 

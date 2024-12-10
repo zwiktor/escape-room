@@ -50,3 +50,123 @@ async def test_get_all_stories_cors(async_client: AsyncClient):
     assert (
         response.headers["access-control-allow-origin"] == "http://localhost:3000"
     ), "CORS origin should match the frontend origin."
+
+
+@pytest.mark.asyncio
+async def test_get_story_valid_authorization(async_client: AsyncClient):
+    """
+    Test authorization retrive story details
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_get_story_unauthorized(async_client: AsyncClient):
+    """
+    Test authorization failed
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_get_story_check_response_model(async_client: AsyncClient):
+    """
+    Test response model for /story/ endpoint
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_buy_story_unauthorized(async_client: AsyncClient):
+    """
+    Test authentication for buy_sotry
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_buy_story_success_boutght(async_client: AsyncClient):
+    """
+    Test succesfull scenario
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_buy_story_unvalid_story_id(async_client: AsyncClient):
+    """
+    Test if response will be bad_request
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_buy_story_already_bought(async_client: AsyncClient):
+    """
+    Test if story hass been bought earlier -> properly response
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_start_story_authorization(async_client: AsyncClient):
+    """
+    Test if starting story need authorization
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_start_story_valid_process(async_client: AsyncClient):
+    """
+    Test if starting story working properly
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_start_story_unvalid_story_id(async_client: AsyncClient):
+    """
+    Test if starting story return valid resopnse with 400 status code and message
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_start_story_already_started(async_client: AsyncClient):
+    """
+    Test if starting story return valid resopnse with 400 status code and message
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_check_access_for_new_story(async_client: AsyncClient):
+    """
+    Test story_acces in initial state
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_check_access_purchased(async_client: AsyncClient):
+    """
+    Test story_acces for purchased state
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_check_access_started(async_client: AsyncClient):
+    """
+    Test story_acces for started state, check attempt id and stage
+    """
+    pass
+
+
+@pytest.mark.asyncio
+async def test_check_access_ended(async_client: AsyncClient):
+    """
+    Test story_acces for finished story with finish_date set
+    """
+    pass

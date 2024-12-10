@@ -22,6 +22,12 @@ from db.db_stage import get_next_stage, get_stage_by_attempt
 
 from schemas.access import StoryStatus, StatusEnum, StoryAccessBase, AttemptBase
 from schemas.attempt import HintsDisplay, HintBase, AttemptDisplay, PasswordCheckDisplay
+from exceptions.exceptions import (
+    StoryAlreadyOwnedError,
+    InsufficientGoldError,
+    EntityDoesNotExistError,
+    StoryAlreadyStartedError,
+)
 
 
 class StoryManager:
@@ -49,7 +55,7 @@ class StoryManager:
         """
         self.story = await get_story_by_id(self.db, story_id)
         if not self.story:
-            raise ValueError(f"Story with id {story_id} not found.")
+            raise EntityDoesNotExistError(f"Story with id {story_id} not found.")
 
         story_access = await get_story_access(self.db, self.user, story_id)
         if story_access:
@@ -77,7 +83,7 @@ class StoryManager:
             self.db, attempt_id, self.user
         )
         if not self.story_access:
-            raise ValueError(f"Attempt - {attempt_id} does not exist")
+            raise EntityDoesNotExistError(f"Attempt - {attempt_id} does not exist")
 
         self.story = self.story_access.story
         self.current_attempt = await get_active_attempt(self.db, self.story_access.id)
@@ -144,10 +150,10 @@ class StoryManager:
 
         # Check if the user already has access
         if self.story_access:
-            raise ValueError("User already owns this story.")
+            raise StoryAlreadyOwnedError("User already owns this story.")
 
         if self.user.gold < self.story.cost:
-            raise ValueError("Insufficient gold to purchase the story.")
+            raise InsufficientGoldError("Insufficient gold to purchase the story.")
 
         # Deduct the cost from the user's gold
         self.user.gold -= self.story.cost
@@ -163,6 +169,9 @@ class StoryManager:
         # Update the StoryManager state
         self.story_access = new_access
         self.story_status = StatusEnum.purchased
+        if self.story_access:
+            return True
+        return False
 
     async def start_story(self):
         """
@@ -173,11 +182,11 @@ class StoryManager:
         """
         # Ensure the user has access to the story
         if not self.story_access:
-            raise ValueError("User does not have access to this story.")
+            raise EntityDoesNotExistError("User does not have access to this story.")
 
         # Check if an active attempt already exists
         if self.current_attempt:
-            raise ValueError("User has already started this story")
+            raise StoryAlreadyStartedError("User has already started this story")
 
         self.current_attempt = await create_first_attempt(
             db=self.db,
@@ -229,6 +238,12 @@ class StoryManager:
     async def get_stories(self) -> List[Story]:
         stories = await get_all_stories(self.db)
         return stories
+
+    async def get_story(self) -> Story:
+        return self.story
+
+    async def get_story_access(self) -> StoryAccess:
+        return self.story_access
 
 
 async def get_story_manager(

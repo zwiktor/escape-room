@@ -31,48 +31,39 @@ async def create_story(
 
 
 @router.post("/{story_id}", response_model=StoryBase)
-async def get_story(story_id: int, db: AsyncSession = Depends(get_async_session)):
-    story = await db_story.get_story(story_id, db)
-    return story
-
-
-@router.post("/{story_id}/buy/", response_model=AccessBase)
 async def get_story(
     story_id: int,
-    db: AsyncSession = Depends(get_async_session),
+    story_manager: StoryManager = Depends(get_story_manager),
     user: User = Depends(current_active_user),
 ):
-    story_access = await db_story.buy_story(db, story_id, user)
-    return story_access
+    await story_manager.load_by_story_id(story_id=story_id)
+    return await story_manager.get_story()
 
 
-@router.post("/{story_id}/start/", response_model=AttemptBase)
+@router.post("/{story_id}/buy/", response_model=StoryStatus)
 async def get_story(
-    story_id: int,
-    db: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_active_user),
+    story_id: int, story_manager: StoryManager = Depends(get_story_manager)
 ):
-    attempt = await db_story.start_story(db, story_id, user)
-    return attempt
+    await story_manager.load_by_story_id(story_id)
+    await story_manager.buy_story()
+    response = await story_manager.check_access()
+    return response
+
+
+@router.post("/{story_id}/start/", response_model=StoryStatus)
+async def get_story(
+    story_id: int, story_manager: StoryManager = Depends(get_story_manager)
+):
+    await story_manager.load_by_story_id(story_id)
+    await story_manager.start_story()
+    response = await story_manager.check_access()
+    return response
 
 
 @router.post("/{story_id}/access/", response_model=StoryStatus)
 async def check_access(
-    story_id: int,
-    db: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_active_user),
+    story_id: int, story_manager: StoryManager = Depends(get_story_manager)
 ):
-    story_status = await db_access.check_status(db, user, story_id)
-    return story_status
-
-    # if story_access is None:
-    #     return {
-    #         'purchase_date': story_access.purchase_date,
-    #         'current_attempt': curr_attempt
-    #     }
-    #
-    # curr_attempt = await db_access.current_attempt(db, user, story_access)
-    # return {
-    #     'purchase_date': story_access.purchase_date,
-    #     'current_attempt': curr_attempt
-    # }
+    await story_manager.load_by_story_id(story_id)
+    response = await story_manager.check_access()
+    return response

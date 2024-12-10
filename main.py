@@ -1,5 +1,10 @@
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, status, Request
+from fastapi.responses import JSONResponse
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+
 from routers import story, attempt
+from typing import Callable, Any, Coroutine
 
 from db.models import User
 from db.database import create_db_and_tables, get_async_session
@@ -11,6 +16,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+
+from exceptions.exceptions import (
+    EscapeRoomError,
+    InsufficientGoldError,
+    StoryAlreadyOwnedError,
+    ServiceError,
+    EntityDoesNotExistError,
+    StoryAlreadyStartedError,
+)
 
 
 @asynccontextmanager
@@ -70,6 +84,53 @@ async def home_page(db: AsyncSession = Depends(get_async_session)):
     var = await populate_data(db)
     return {"message": f"{var}"}
 
+
+def create_exception_handler(
+    status_code: int, initial_detail: str
+) -> Callable[[Request, EscapeRoomError], Coroutine[Any, Any, JSONResponse]]:
+    detail = {"message": initial_detail}  # Using a dictionary to hold the detail
+
+    async def exception_handler(_: Request, exc: EscapeRoomError) -> JSONResponse:
+        if exc.message:
+            detail["message"] = exc.message
+
+        if exc.name:
+            detail["message"] = f"{detail['message']} [{exc.name}]"
+
+        return JSONResponse(
+            status_code=status_code, content={"detail": detail["message"]}
+        )
+
+    return exception_handler
+
+
+app.add_exception_handler(
+    exc_class_or_status_code=StoryAlreadyOwnedError,
+    handler=create_exception_handler(
+        status.HTTP_400_BAD_REQUEST, "User already have acces to the story."
+    ),
+)
+
+app.add_exception_handler(
+    exc_class_or_status_code=InsufficientGoldError,
+    handler=create_exception_handler(
+        status.HTTP_400_BAD_REQUEST, "Not enough gold to handle transaction"
+    ),
+)
+
+app.add_exception_handler(
+    exc_class_or_status_code=StoryAlreadyStartedError,
+    handler=create_exception_handler(
+        status.HTTP_400_BAD_REQUEST, "User already have started story"
+    ),
+)
+
+app.add_exception_handler(
+    exc_class_or_status_code=EntityDoesNotExistError,
+    handler=create_exception_handler(
+        status.HTTP_400_BAD_REQUEST, "Entity doesn't found in database"
+    ),
+)
 
 origins = [
     "http://localhost:3000",
