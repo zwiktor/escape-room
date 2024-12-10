@@ -55,17 +55,43 @@ async def test_get_all_stories_cors(async_client: AsyncClient):
 @pytest.mark.asyncio
 async def test_get_story_valid_authorization(async_client: AsyncClient):
     """
-    Test authorization retrive story details
+    Test retrieving story details with valid authorization.
     """
-    pass
+    response = await async_client.post(
+        "/auth/redis/login",
+        data={
+            "grant_type": "",
+            "username": "user1",
+            "password": "hashed1",
+            "scope": "",
+            "client_id": "",
+            "client_secret": "",
+        },
+        headers={
+            "accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+    )
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+
+    # Access the story endpoint
+    response = await async_client.post(
+        "/story/1", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == 1
+    assert data["title"] == "Adventure Story"
 
 
 @pytest.mark.asyncio
 async def test_get_story_unauthorized(async_client: AsyncClient):
     """
-    Test authorization failed
+    Test retrieving story details without authorization.
     """
-    pass
+    response = await async_client.post("/story/1")
+    assert response.status_code == 401
 
 
 @pytest.mark.asyncio

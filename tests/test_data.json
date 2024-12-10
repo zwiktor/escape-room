@@ -3,7 +3,7 @@
     {
       "email": "user1@example.com",
       "username": "user1",
-      "hashed_password": "hashed1",
+      "hashed_password": "$2b$12$vNlfTpoRFF1ZJSMctkPPkOUaE92D7gYD6RwDR5vcq5uzy46wrlYXG",
       "is_active": true,
       "is_verified": true,
       "gold": 1000

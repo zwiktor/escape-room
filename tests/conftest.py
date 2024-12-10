@@ -39,9 +39,11 @@ async def setup_database():
 
         async with AsyncSessionLocal() as session:
             # Populate User data
+            password_helper = PasswordHelper()
             users = {
                 user_data["email"]: User(**user_data) for user_data in data["users"]
             }
+
             session.add_all(users.values())
             await session.commit()
             # Populate Story data
