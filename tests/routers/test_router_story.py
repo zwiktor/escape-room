@@ -1,6 +1,7 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import text
+from tests.routers.test_login import login_and_get_token
 
 
 @pytest.mark.asyncio
@@ -57,23 +58,7 @@ async def test_get_story_valid_authorization(async_client: AsyncClient):
     """
     Test retrieving story details with valid authorization.
     """
-    response = await async_client.post(
-        "/auth/redis/login",
-        data={
-            "grant_type": "",
-            "username": "user1",
-            "password": "hashed1",
-            "scope": "",
-            "client_id": "",
-            "client_secret": "",
-        },
-        headers={
-            "accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
-    )
-    assert response.status_code == 200
-    token = response.json()["access_token"]
+    token = await login_and_get_token(async_client)
 
     # Access the story endpoint
     response = await async_client.post(
@@ -102,6 +87,13 @@ async def test_get_story_check_response_model(async_client: AsyncClient):
     """
     Test response model for /story/{story_id} endpoint.
     """
+    token = await login_and_get_token(async_client)
+    response = await async_client.post(
+        "/story/1", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "id" in data and "title" in data and "cost" in data
 
 
 @pytest.mark.asyncio
@@ -109,7 +101,8 @@ async def test_buy_story_unauthorized(async_client: AsyncClient):
     """
     Test authentication for buy_sotry
     """
-    pass
+    response = await async_client.post("/story/1/buy/")
+    assert response.status_code == 401
 
 
 @pytest.mark.asyncio
@@ -117,7 +110,13 @@ async def test_buy_story_success_boutght(async_client: AsyncClient):
     """
     Test succesfull scenario
     """
-    pass
+    token = await login_and_get_token(async_client, "user4", "hashed4")
+    response = await async_client.post(
+        "/story/1/buy/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "purchased"
 
 
 @pytest.mark.asyncio

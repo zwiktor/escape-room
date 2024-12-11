@@ -3,6 +3,7 @@ from httpx import AsyncClient
 from fastapi import status
 
 
+@pytest.mark.asyncio
 async def login_and_get_token(
     async_client: AsyncClient,
     username: str = "user1@example.com",
@@ -31,7 +32,6 @@ async def login_and_get_token(
             "Content-Type": "application/x-www-form-urlencoded",
         },
     )
-    assert response.status_code == 200, f"Login failed: {response.json()}"
     return response.json()["access_token"]
 
 

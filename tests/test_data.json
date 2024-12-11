@@ -24,8 +24,10 @@
     {
       "email": "user4@example.com",
       "username": "user4",
-      "hashed_password": "hashed4",
-      "is_active": false
+      "hashed_password": "$2b$12$k.urd86qbLWCbU9wrBHVNu0bjzjsDj3R.a5pFRx8p7/TkLgdmI.F2",
+      "is_active": true,
+      "is_verified": true,
+      "gold": 1000
     }
   ],
   "stories": [
