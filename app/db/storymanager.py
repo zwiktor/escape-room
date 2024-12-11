@@ -20,7 +20,13 @@ from app.db.db_queries import convert_to_pydantic
 from app.db.db_stage import get_next_stage, get_stage_by_attempt
 
 from app.schemas.access import StoryStatus, StatusEnum, StoryAccessBase, AttemptBase
-from app.schemas.attempt import HintsDisplay, HintBase, PasswordCheckDisplay
+from app.schemas.attempt import (
+    HintsDisplay,
+    HintBase,
+    PasswordCheckDisplay,
+    AttemptDisplay,
+    StageDisplay,
+)
 from app.exceptions.exceptions import (
     StoryAlreadyOwnedError,
     InsufficientGoldError,
@@ -81,8 +87,6 @@ class StoryManager:
         self.story_access = await get_story_access_by_attempt(
             self.db, attempt_id, self.user
         )
-        if not self.story_access:
-            raise EntityDoesNotExistError(f"Attempt - {attempt_id} does not exist")
 
         self.story = self.story_access.story
         self.current_attempt = await get_active_attempt(self.db, self.story_access.id)
@@ -243,6 +247,17 @@ class StoryManager:
 
     async def get_story_access(self) -> StoryAccess:
         return self.story_access
+
+    async def get_attempt(self) -> AttemptDisplay:
+        attempt = AttemptDisplay(
+            start_date=self.current_attempt.start_date,
+            stage=StageDisplay(
+                name=self.stage.name,
+                level=self.stage.level,
+                question=self.stage.question,
+            ),
+        )
+        return attempt
 
 
 async def get_story_manager(

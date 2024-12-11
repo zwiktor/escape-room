@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.database import get_async_session
+from app.db.storymanager import StoryManager, get_story_manager
 from app.schemas.attempt import (
     AttemptDisplay,
     HintsDisplay,
@@ -20,18 +20,18 @@ router = APIRouter(prefix="/attempt", tags=["attempt"])
 @router.post("/{attempt_id}", response_model=AttemptDisplay)
 async def get_attempt(
     attempt_id: int,
-    db: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_active_user),
+    story_manager: StoryManager = Depends(get_story_manager),
 ):
-    attempt_display = await db_attempt.get_attempt(db, attempt_id, user)
-    return attempt_display
+    await story_manager.load_by_attempt_id(attempt_id)
+
+    attempt = await story_manager.get_attempt()
+    return attempt
 
 
 @router.post("/{attempt_id}/hints", response_model=HintsDisplay)
 async def get_hints(
     attempt_id: int,
-    db: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_active_user),
+    story_manager: StoryManager = Depends(get_story_manager),
 ):
     hints_list = await db_attempt.get_hints(attempt_id, db, user)
     return HintsDisplay(hints=hints_list)
@@ -41,8 +41,7 @@ async def get_hints(
 async def password_validation(
     request: PasswordFormBase,
     attempt_id: int,
-    db: AsyncSession = Depends(get_async_session),
-    user: User = Depends(current_active_user),
+    story_manager: StoryManager = Depends(get_story_manager),
 ):
     attempt_response = await db_attempt.validate_password(request, attempt_id, db, user)
     return attempt_response

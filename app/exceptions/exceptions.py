@@ -35,3 +35,9 @@ class EntityDoesNotExistError(EscapeRoomError):
     """Not enough gold for purchase the story"""
 
     pass
+
+
+class UnAuthenticatedUserError(EscapeRoomError):
+    """Not enough gold for purchase the story"""
+
+    pass

@@ -23,6 +23,7 @@ from app.exceptions.exceptions import (
     StoryAlreadyOwnedError,
     EntityDoesNotExistError,
     StoryAlreadyStartedError,
+    UnAuthenticatedUserError,
 )
 
 
@@ -128,6 +129,12 @@ app.add_exception_handler(
     exc_class_or_status_code=EntityDoesNotExistError,
     handler=create_exception_handler(
         status.HTTP_404_NOT_FOUND, "Entity doesn't found in database"
+    ),
+)
+app.add_exception_handler(
+    exc_class_or_status_code=UnAuthenticatedUserError,
+    handler=create_exception_handler(
+        status.HTTP_401_UNAUTHORIZED, "user unauthorized for this opperation"
     ),
 )
 
