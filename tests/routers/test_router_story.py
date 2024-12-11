@@ -100,9 +100,8 @@ async def test_get_story_unauthorized(async_client: AsyncClient):
 @pytest.mark.asyncio
 async def test_get_story_check_response_model(async_client: AsyncClient):
     """
-    Test response model for /story/ endpoint
+    Test response model for /story/{story_id} endpoint.
     """
-    pass
 
 
 @pytest.mark.asyncio

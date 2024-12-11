@@ -11,14 +11,15 @@ import logging
 from httpx import ASGITransport, AsyncClient
 from main import app
 import redis.asyncio as aioredis
+from users.auth import get_redis_strategy, RedisStrategy
 from db.extended_user_database import ExtendedSQLAlchemyUserDatabase
 from db.models import User
 from fastapi_users.password import PasswordHelper
 from db.db_queries import get_instance
 from db.storymanager import StoryManager
+import asyncio
 
-
-REDIS_URL = "redis://localhost:6379/0"
+REDIS_URL = "redis://localhost:6379/1"
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 # Tworzymy asynchroniczny silnik i konfigurujemy sesję
 engine = create_async_engine(DATABASE_URL, echo=False)
@@ -174,17 +175,28 @@ def override_get_async_session():
     app.dependency_overrides[get_async_session] = get_test_async_session
 
 
-@pytest_asyncio.fixture
-async def redis_client():
+@pytest_asyncio.fixture(scope="function")
+async def test_redis():
+    """Provide a Redis client for testing."""
+    redis = aioredis.from_url("redis://localhost:6379/0", decode_responses=True)
+    await redis.flushdb()  # Clear Redis before each test
+    yield redis
+    await redis.flushdb()  # Clear Redis before each test
+    await redis.aclose()  # Properly close the Redis client
+
+
+@pytest.fixture(scope="function")
+def override_get_redis_strategy(test_redis):
     """
-    Provide a Redis client for testing.
+    Override the `get_redis_strategy` dependency to use the test Redis instance.
     """
-    redis = aioredis.from_url(REDIS_URL, decode_responses=True)
-    try:
-        yield redis
-    finally:
-        await redis.aclose()  # Close the Redis connection explicitly
-        await redis.connection_pool.disconnect()  # Ensure all connections are closed
+
+    def _get_test_redis_strategy():
+        return RedisStrategy(test_redis, lifetime_seconds=3600)
+
+    app.dependency_overrides[get_redis_strategy] = _get_test_redis_strategy
+    yield
+    app.dependency_overrides.pop(get_redis_strategy, None)
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)
@@ -195,7 +207,7 @@ def suppress_sqlalchemy_logs():
 
 
 @pytest_asyncio.fixture
-async def async_client():
+async def async_client(override_get_redis_strategy):
     """Fixture for the HTTPX AsyncClient."""
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://testserver"

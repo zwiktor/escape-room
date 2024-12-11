@@ -9,11 +9,11 @@ from db.models import User
 
 
 @pytest.mark.asyncio
-async def test_redis_connection(redis_client):
+async def test_redis_connection(test_redis):
     """Test that the Redis connection is established successfully."""
     try:
         # Test Redis ping
-        result = await redis_client.ping()
+        result = await test_redis.ping()
         assert result is True
     except Exception as e:
         pytest.fail(f"Could not connect to Redis: {e}")
