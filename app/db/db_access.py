@@ -19,7 +19,7 @@ async def get_story_access_by_attempt(
     attempt = await get_instance(db, Attempt, id=attempt_id)
     if not attempt:
         raise EntityDoesNotExistError(
-            message=f"Attempt with {attempt_id} doesn't exists"
+            message=f"Attempt with {attempt_id} id does not exist"
         )
     await db.refresh(attempt, ["access"])
     story_access = attempt.access

@@ -9,6 +9,7 @@ from app.exceptions.exceptions import (
     StoryAlreadyStartedError,
     StoryAlreadyOwnedError,
     InsufficientGoldError,
+    UnAuthenticatedUserError,
 )
 
 
@@ -191,7 +192,8 @@ async def test_load_by_attempt_id_invalid_attempt(
 
     # Call the method and expect a ValueError
     with pytest.raises(
-        EntityDoesNotExistError, match=f"Attempt - {invalid_attempt_id} does not exist"
+        EntityDoesNotExistError,
+        match=f"Attempt with {invalid_attempt_id} id does not exist",
     ):
         await story_manager.load_by_attempt_id(invalid_attempt_id)
 
@@ -207,7 +209,7 @@ async def test_load_by_attempt_id_no_access(
 
     # Call the method and expect a ValueError
     with pytest.raises(
-        EntityDoesNotExistError, match=f"Attempt - {attempt_id} does not exist"
+        UnAuthenticatedUserError, match=f"User doesn't have access to this attempt"
     ):
         await story_manager.load_by_attempt_id(attempt_id)
 

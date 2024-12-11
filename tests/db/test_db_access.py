@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import StoryAccess, User
 from app.db.db_access import get_story_access, get_story_access_by_attempt
 
+from app.exceptions.exceptions import EntityDoesNotExistError, UnAuthenticatedUserError
+
 
 @pytest.mark.asyncio
 async def test_get_story_access(session: AsyncSession, mock_user: User):
@@ -65,12 +67,12 @@ async def test_get_story_access_by_attempt_nonexistent_attempt(
     attempt_id = 9999  # Zakładamy, że takie attempt_id nie istnieje
 
     # Wywołanie testowanej funkcji
-    story_access = await get_story_access_by_attempt(session, attempt_id, mock_user)
-
-    # Sprawdzenie poprawności wyniku
-    assert (
-        story_access is None
-    ), "StoryAccess should not exist for the given user and non-existent attempt_id."
+    with pytest.raises(
+        EntityDoesNotExistError, match=f"Attempt with {attempt_id} id does not exist"
+    ):
+        await get_story_access_by_attempt(
+            session, attempt_id=attempt_id, user=mock_user
+        )
 
 
 @pytest.mark.asyncio
@@ -80,10 +82,7 @@ async def test_get_story_access_by_attempt_invalid_user(
     # Pobierz przykładową próbę i użytkownika, który nie ma dostępu
     attempt_id = 5  # Zakładamy, że attempt_id 1 istnieje w test_data.json
 
-    # Wywołanie testowanej funkcji
-    story_access = await get_story_access_by_attempt(session, attempt_id, mock_user)
-
-    # Sprawdzenie poprawności wyniku
-    assert (
-        story_access is None
-    ), "StoryAccess should not exist for a user without access."
+    with pytest.raises(
+        UnAuthenticatedUserError, match="User doesn't have access to this attempt"
+    ):
+        await get_story_access_by_attempt(session, attempt_id, mock_user)
