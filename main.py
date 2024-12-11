@@ -128,7 +128,7 @@ app.add_exception_handler(
 app.add_exception_handler(
     exc_class_or_status_code=EntityDoesNotExistError,
     handler=create_exception_handler(
-        status.HTTP_400_BAD_REQUEST, "Entity doesn't found in database"
+        status.HTTP_404_NOT_FOUND, "Entity doesn't found in database"
     ),
 )
 

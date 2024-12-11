@@ -122,9 +122,15 @@ async def test_buy_story_success_boutght(async_client: AsyncClient):
 @pytest.mark.asyncio
 async def test_buy_story_unvalid_story_id(async_client: AsyncClient):
     """
-    Test if response will be bad_request
+    Test if response will be 404 for invalid story ID
     """
-    pass
+    token = await login_and_get_token(async_client)
+    response = await async_client.post(
+        "/story/999/buy/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 404
+    data = response.json()
+    assert data["detail"] == f"Story with id {999} not found. [EscapeRoom]"
 
 
 @pytest.mark.asyncio
@@ -132,15 +138,22 @@ async def test_buy_story_already_bought(async_client: AsyncClient):
     """
     Test if story hass been bought earlier -> properly response
     """
-    pass
+    token = await login_and_get_token(async_client)
+    response = await async_client.post(
+        "/story/1/buy/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 400
+    data = response.json()
+    assert data["detail"] == f"User already owns this story. [EscapeRoom]"
 
 
 @pytest.mark.asyncio
-async def test_start_story_authorization(async_client: AsyncClient):
+async def test_start_story_authorization_failed(async_client: AsyncClient):
     """
-    Test if starting story need authorization
+    Test if starting a story requires authorization.
     """
-    pass
+    response = await async_client.post("/story/1/start/")
+    assert response.status_code == 401
 
 
 @pytest.mark.asyncio
@@ -148,15 +161,37 @@ async def test_start_story_valid_process(async_client: AsyncClient):
     """
     Test if starting story working properly
     """
-    pass
+
+    # Log in to authenticate
+    token = await login_and_get_token(async_client, "user4", "hashed4")
+
+    # Buy the story
+    response = await async_client.post(
+        "/story/1/buy/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+
+    # Start the story
+    response = await async_client.post(
+        "/story/1/start/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "started"
 
 
 @pytest.mark.asyncio
 async def test_start_story_unvalid_story_id(async_client: AsyncClient):
     """
-    Test if starting story return valid resopnse with 400 status code and message
+    Test if response will be 404 for invalid story ID
     """
-    pass
+    token = await login_and_get_token(async_client)
+    response = await async_client.post(
+        "/story/999/buy/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 404
+    data = response.json()
+    assert data["detail"] == f"Story with id {999} not found. [EscapeRoom]"
 
 
 @pytest.mark.asyncio
@@ -164,7 +199,16 @@ async def test_start_story_already_started(async_client: AsyncClient):
     """
     Test if starting story return valid resopnse with 400 status code and message
     """
-    pass
+    # Log in to authenticate
+    token = await login_and_get_token(async_client)
+
+    # Start the story
+    response = await async_client.post(
+        "/story/1/start/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 400
+    data = response.json()
+    assert data["detail"] == "User has already started this story [EscapeRoom]"
 
 
 @pytest.mark.asyncio
@@ -172,7 +216,18 @@ async def test_check_access_for_new_story(async_client: AsyncClient):
     """
     Test story_acces in initial state
     """
-    pass
+    # Log in to authenticate
+    token = await login_and_get_token(async_client, "user4", "hashed4")
+
+    # check access
+    response = await async_client.post(
+        "/story/1/access/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["status"] == "new"
+    assert data["story_access"] is None
 
 
 @pytest.mark.asyncio
@@ -180,7 +235,23 @@ async def test_check_access_purchased(async_client: AsyncClient):
     """
     Test story_acces for purchased state
     """
-    pass
+    token = await login_and_get_token(async_client, "user4", "hashed4")
+
+    # Buy the story
+    response = await async_client.post(
+        "/story/1/buy/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+    # check access
+    response = await async_client.post(
+        "/story/1/access/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["status"] == "purchased"
+    assert data["story_access"]["purchase_date"] is not None
+    assert data["story_access"]["current_attempt"] is None
 
 
 @pytest.mark.asyncio
@@ -188,7 +259,29 @@ async def test_check_access_started(async_client: AsyncClient):
     """
     Test story_acces for started state, check attempt id and stage
     """
-    pass
+    token = await login_and_get_token(async_client, "user4", "hashed4")
+
+    # Buy the story
+    response = await async_client.post(
+        "/story/1/buy/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+    # Start the story
+    response = await async_client.post(
+        "/story/1/start/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+
+    # check access
+    response = await async_client.post(
+        "/story/1/access/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["status"] == "started"
+    assert data["story_access"]["purchase_date"] is not None
+    assert data["story_access"]["current_attempt"] is not None
 
 
 @pytest.mark.asyncio
@@ -196,4 +289,20 @@ async def test_check_access_ended(async_client: AsyncClient):
     """
     Test story_acces for finished story with finish_date set
     """
-    pass
+    token = await login_and_get_token(async_client)
+
+    # check access
+    response = await async_client.post(
+        "/story/4/access/", headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["status"] == "finished"
+    assert data["story_access"]["purchase_date"] is not None
+    assert data["story_access"]["current_attempt"] is not None
+    assert data["story_access"]["current_attempt"]["finish_date"] is not None
+    assert (
+        data["story_access"]["purchase_date"]
+        < data["story_access"]["current_attempt"]["finish_date"]
+    )
