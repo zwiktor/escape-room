@@ -176,12 +176,15 @@ def override_get_async_session():
 
 @pytest_asyncio.fixture
 async def redis_client():
-    """Provide a Redis client for testing."""
+    """
+    Provide a Redis client for testing.
+    """
     redis = aioredis.from_url(REDIS_URL, decode_responses=True)
-    await redis.flushdb()  # Clear Redis before each test
-    yield redis
-    await redis.flushdb()
-    await redis.aclose()
+    try:
+        yield redis
+    finally:
+        await redis.aclose()  # Close the Redis connection explicitly
+        await redis.connection_pool.disconnect()  # Ensure all connections are closed
 
 
 @pytest_asyncio.fixture(scope="function", autouse=True)

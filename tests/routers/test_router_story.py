@@ -83,6 +83,9 @@ async def test_get_story_valid_authorization(async_client: AsyncClient):
     data = response.json()
     assert data["id"] == 1
     assert data["title"] == "Adventure Story"
+    response = await async_client.post(
+        "/story/1", headers={"Authorization": f"Bearer {token}"}
+    )
 
 
 @pytest.mark.asyncio
