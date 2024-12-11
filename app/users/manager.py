@@ -1,14 +1,12 @@
 import uuid
-from typing import Optional, Union
+from typing import Optional
 
-from fastapi import Depends, Request, HTTPException, status
+from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, UUIDIDMixin, FastAPIUsers
-from sqlalchemy.future import select
 
-from db.database import get_user_db, get_async_session
-from db.models import User
-from users.auth import auth_backend
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.database import get_user_db
+from app.db.models import User
+from app.users.auth import auth_backend
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users.exceptions import UserNotExists
 

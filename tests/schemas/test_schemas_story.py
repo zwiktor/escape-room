@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 from datetime import datetime
-from schemas.story import StoryDisplay, StoryBase  # Adjust to the correct import path
+from app.schemas.story import StoryBase  # Adjust to the correct import path
 
 
 def test_story_base_schema():

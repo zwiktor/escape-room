@@ -1,13 +1,12 @@
 import pytest
 from pydantic import ValidationError
 from datetime import datetime
-from schemas.attempt import (
+from app.schemas.attempt import (
     HintBase,
     HintsDisplay,
     AttemptDisplay,
     PasswordFormBase,
     PasswordCheckDisplay,
-    StageDisplay,
 )  # Adjust import paths as necessary
 
 # Fixture data for testing

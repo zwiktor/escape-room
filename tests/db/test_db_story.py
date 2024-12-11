@@ -1,13 +1,12 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.db_story import (
+from app.db.db_story import (
     get_all_stories,
     get_story_by_id,
     create_story,
 )
-from db.models import Story
-from schemas.story import StoryDisplay
-from db.storymanager import StoryManager
+from app.db.models import Story
+from app.schemas.story import StoryDisplay
 
 
 @pytest.mark.asyncio

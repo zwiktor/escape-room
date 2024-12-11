@@ -1,11 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
-from db.models import Story, Stage, StoryAccess, Attempt
+from app.db.models import StoryAccess, Attempt
 from typing import Optional
-from uuid import UUID
 
-from db.db_queries import get_instance, get_or_create, get_last_instance
-from db.models import User
+from app.db.db_queries import get_instance
+from app.db.models import User
 
 
 async def get_story_access(db: AsyncSession, user: User, story_id: int) -> StoryAccess:

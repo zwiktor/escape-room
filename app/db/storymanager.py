@@ -1,12 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
 from typing import Optional, List
 from fastapi import Depends
-from db.models import User, Story, Attempt, StoryAccess, Stage
-from db.database import get_async_session
-from users.manager import current_active_user
+from app.db.models import User, Story, Attempt, StoryAccess, Stage
+from app.db.database import get_async_session
+from app.users.manager import current_active_user
 
-from db.db_attempt import (
+from app.db.db_attempt import (
     get_active_attempt,
     get_hints,
     create_first_attempt,
@@ -15,14 +14,14 @@ from db.db_attempt import (
     finish_attempt,
     create_next_attempt,
 )
-from db.db_access import get_story_access_by_attempt, get_story_access
-from db.db_story import get_story_by_id, get_all_stories
-from db.db_queries import convert_to_pydantic
-from db.db_stage import get_next_stage, get_stage_by_attempt
+from app.db.db_access import get_story_access_by_attempt, get_story_access
+from app.db.db_story import get_story_by_id, get_all_stories
+from app.db.db_queries import convert_to_pydantic
+from app.db.db_stage import get_next_stage, get_stage_by_attempt
 
-from schemas.access import StoryStatus, StatusEnum, StoryAccessBase, AttemptBase
-from schemas.attempt import HintsDisplay, HintBase, AttemptDisplay, PasswordCheckDisplay
-from exceptions.exceptions import (
+from app.schemas.access import StoryStatus, StatusEnum, StoryAccessBase, AttemptBase
+from app.schemas.attempt import HintsDisplay, HintBase, PasswordCheckDisplay
+from app.exceptions.exceptions import (
     StoryAlreadyOwnedError,
     InsufficientGoldError,
     EntityDoesNotExistError,

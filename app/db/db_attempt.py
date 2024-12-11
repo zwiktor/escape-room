@@ -1,7 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import (
-    User,
+from app.db.models import (
     Attempt,
     HintsAttempt,
     Hint,
@@ -9,7 +8,7 @@ from db.models import (
     StoryAccess,
     PasswordAttempt,
 )
-from db.db_queries import (
+from app.db.db_queries import (
     get_instance,
     get_instances,
     get_last_instance,

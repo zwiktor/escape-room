@@ -1,10 +1,10 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import OperationalError
-from db.models import Base, User
-from db.extended_user_database import ExtendedSQLAlchemyUserDatabase
+from app.db.models import User
+from app.db.extended_user_database import ExtendedSQLAlchemyUserDatabase
 from sqlalchemy.sql import text
-from tests.conftest import engine, AsyncSessionLocal
+from tests.conftest import engine
 
 
 @pytest.mark.asyncio

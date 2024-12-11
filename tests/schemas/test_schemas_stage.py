@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from schemas.stage import (
+from app.schemas.stage import (
     StageDisplay,
     StageBase,
 )  # Replace with the correct path to your models

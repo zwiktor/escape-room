@@ -1,10 +1,7 @@
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-from db.models import *
-from db.db_attempt import *
-from db.db_queries import get_instance, get_or_create, get_last_instance
-from schemas.attempt import AttemptDisplay
-from schemas.stage import StageDisplay
+from app.db.models import *
+from app.db.db_attempt import *
+from app.db.db_queries import get_instance
 
 
 @pytest.mark.asyncio
@@ -137,7 +134,7 @@ async def test_create_first_attempt_rollback(session: AsyncSession, mocker):
     # Use an invalid session or close the session to simulate a database error
     story_access = await get_instance(session, StoryAccess, id=7)
 
-    mocker.patch("db.db_attempt.Attempt", side_effect=Exception("Mocked Exception"))
+    mocker.patch("app.db.db_attempt.Attempt", side_effect=Exception("Mocked Exception"))
 
     # Call the function and expect an exception
     with pytest.raises(

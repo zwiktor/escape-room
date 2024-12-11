@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from db.models import (
+from app.db.models import (
     Base,
     User,
     Story,

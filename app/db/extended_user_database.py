@@ -1,7 +1,7 @@
 from sqlalchemy import or_, func
 from sqlalchemy.future import select
 from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
-from db.models import User
+from app.db.models import User
 from typing import Optional
 
 

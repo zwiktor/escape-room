@@ -1,8 +1,7 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.models import Story, Stage, StoryAccess, Attempt, User
-from db.db_access import get_story_access, get_story_access_by_attempt
-from schemas.access import *
+from app.db.models import StoryAccess, User
+from app.db.db_access import get_story_access, get_story_access_by_attempt
 
 
 @pytest.mark.asyncio

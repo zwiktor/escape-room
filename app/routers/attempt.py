@@ -1,21 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Union
-import time
 
-from db.database import get_async_session
-from schemas.attempt import (
+from app.db.database import get_async_session
+from app.schemas.attempt import (
     AttemptDisplay,
     HintsDisplay,
     PasswordCheckDisplay,
     PasswordFormBase,
 )
 
-from db import db_attempt
-from db import db_access
-from db.models import User
+from app.db import db_attempt
+from app.db.models import User
 
-from users.manager import current_active_user
+from app.users.manager import current_active_user
 
 router = APIRouter(prefix="/attempt", tags=["attempt"])
 

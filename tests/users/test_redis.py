@@ -1,11 +1,8 @@
 import pytest
 from fastapi_users.authentication import RedisStrategy, BearerTransport
-from users.auth import redis, get_redis_strategy, auth_backend
-from unittest.mock import AsyncMock, patch
+from app.users.auth import get_redis_strategy, auth_backend
 from fastapi_users.models import UserProtocol
 import redis.asyncio as aioredis
-from users.manager import UserManager
-from db.models import User
 
 
 @pytest.mark.asyncio

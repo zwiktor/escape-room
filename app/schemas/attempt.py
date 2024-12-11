@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import Optional, List
 
-from schemas.stage import StageDisplay
+from app.schemas.stage import StageDisplay
 
 
 class HintBase(BaseModel):

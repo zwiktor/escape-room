@@ -1,8 +1,6 @@
 import pytest
 from fastapi_users.exceptions import UserNotExists
-from db.models import User
-from users.manager import UserManager
-from sqlalchemy.ext.asyncio import AsyncSession
+from app.users.manager import UserManager
 from fastapi.security import OAuth2PasswordRequestForm
 
 

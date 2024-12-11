@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 from datetime import datetime
 from uuid import uuid4
-from schemas.access import (
+from app.schemas.access import (
     StatusEnum,
     AttemptBase,
     AccessBase,

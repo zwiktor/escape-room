@@ -1,9 +1,9 @@
 from typing import AsyncGenerator
 
 from fastapi import Depends
-from db.extended_user_database import ExtendedSQLAlchemyUserDatabase
+from app.db.extended_user_database import ExtendedSQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from db.models import Base, User
+from app.db.models import Base, User
 
 
 DATABASE_URL = "sqlite+aiosqlite:///./devdb.db"

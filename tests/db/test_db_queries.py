@@ -1,9 +1,7 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
-from db.models import User, Story, Stage
-from db.db_queries import (
-    convert_to_pydantic,
+from app.db.models import User, Stage
+from app.db.db_queries import (
     get_instance,
     get_last_instance,
     create_instance,
@@ -12,7 +10,6 @@ from db.db_queries import (
     MultipleResultsException,
     get_first_instance,
 )
-from pydantic import BaseModel
 
 
 @pytest.mark.asyncio

@@ -2,22 +2,21 @@ import pytest
 import json
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from db.database import get_async_session
-from db.models import *
-from users.manager import get_user_manager
+from app.db.database import get_async_session
+from app.db.models import *
+from app.users.manager import get_user_manager
 from pathlib import Path
 from datetime import datetime
 import logging
 from httpx import ASGITransport, AsyncClient
 from main import app
 import redis.asyncio as aioredis
-from users.auth import get_redis_strategy, RedisStrategy
-from db.extended_user_database import ExtendedSQLAlchemyUserDatabase
-from db.models import User
+from app.users.auth import get_redis_strategy, RedisStrategy
+from app.db.extended_user_database import ExtendedSQLAlchemyUserDatabase
+from app.db.models import User
 from fastapi_users.password import PasswordHelper
-from db.db_queries import get_instance
-from db.storymanager import StoryManager
-import asyncio
+from app.db.db_queries import get_instance
+from app.db.storymanager import StoryManager
 
 REDIS_URL = "redis://localhost:6379/1"
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"

@@ -1,16 +1,14 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from db.models import User, Story, StoryAccess, Attempt, HintsAttempt, Hint
-from db.storymanager import StoryManager
-from schemas.access import StatusEnum, StoryStatus, StoryAccessBase, AttemptBase
-from schemas.attempt import HintBase, HintsDisplay, PasswordCheckDisplay
+from app.db.storymanager import StoryManager
+from app.schemas.access import StatusEnum, StoryStatus, StoryAccessBase, AttemptBase
+from app.schemas.attempt import HintBase, HintsDisplay, PasswordCheckDisplay
 
-from exceptions.exceptions import (
+from app.exceptions.exceptions import (
     EntityDoesNotExistError,
     StoryAlreadyStartedError,
     StoryAlreadyOwnedError,
     InsufficientGoldError,
-    ServiceError,
 )
 
 

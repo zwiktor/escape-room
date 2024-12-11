@@ -1,27 +1,26 @@
-from fastapi import Depends, FastAPI, status, Request
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, status
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from routers import story, attempt
+from app.routers import story
+from app.routers import attempt
 from typing import Callable, Any, Coroutine
 
-from db.models import User
-from db.database import create_db_and_tables, get_async_session
-from users.schemas import UserCreate, UserRead, UserUpdate
-from users.manager import current_active_user, fastapi_users
-from users.auth import auth_backend
+from app.db.models import User
+from app.db.database import create_db_and_tables, get_async_session
+from app.users.schemas import UserCreate, UserRead, UserUpdate
+from app.users.manager import current_active_user, fastapi_users
+from app.users.auth import auth_backend
 from populate_data import populate_data
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from exceptions.exceptions import (
+from app.exceptions.exceptions import (
     EscapeRoomError,
     InsufficientGoldError,
     StoryAlreadyOwnedError,
-    ServiceError,
     EntityDoesNotExistError,
     StoryAlreadyStartedError,
 )

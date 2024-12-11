@@ -1,9 +1,7 @@
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-from db.db_stage import *
-from db.models import Stage, Story
-from db.db_queries import get_first_instance
-from schemas.story import StoryDisplay
+from app.db.db_stage import *
+from app.db.models import Stage
+from app.db.db_queries import get_first_instance
 
 
 @pytest.mark.asyncio

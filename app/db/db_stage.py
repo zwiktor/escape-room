@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import Story, Stage, Attempt
-from db.db_queries import get_instance
+from app.db.models import Stage, Attempt
+from app.db.db_queries import get_instance
 
 
 async def get_next_stage(db: AsyncSession, stage: Stage):

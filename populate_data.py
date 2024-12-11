@@ -1,4 +1,4 @@
-from db.models import User, Story, Stage, Hint, StoryAccess, Attempt, PasswordAttempt
+from app.db.models import User, Story, Stage, Hint
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from random import randint
