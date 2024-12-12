@@ -21,6 +21,7 @@ class HintsDisplay(BaseModel):
 class AttemptDisplay(BaseModel):
     start_date: datetime
     stage: StageDisplay
+    is_finished: Optional[bool]
 
 
 class PasswordFormBase(BaseModel):

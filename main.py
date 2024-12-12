@@ -1,6 +1,7 @@
 from fastapi import Depends, FastAPI, status
 from starlette.requests import Request
 from starlette.responses import JSONResponse
+from fastapi.exceptions import HTTPException
 
 from app.routers import story
 from app.routers import attempt
@@ -137,6 +138,7 @@ app.add_exception_handler(
         status.HTTP_401_UNAUTHORIZED, "user unauthorized for this opperation"
     ),
 )
+
 
 origins = [
     "http://localhost:3000",

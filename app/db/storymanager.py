@@ -94,6 +94,7 @@ class StoryManager:
         # Sytuacja w której zostanie podany attempt_id który został już rozwiązany
         # Należy przenieść historię do aktualnego lub stowrzyć stronę ze wskazaniem na aktualny
         if self.current_attempt.id != attempt_id:
+
             self.attempt_finished = True
 
         if self.current_attempt.finish_date:
@@ -256,6 +257,7 @@ class StoryManager:
                 level=self.stage.level,
                 question=self.stage.question,
             ),
+            is_finished=self.attempt_finished,
         )
         return attempt
 
