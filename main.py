@@ -25,6 +25,7 @@ from app.exceptions.exceptions import (
     EntityDoesNotExistError,
     StoryAlreadyStartedError,
     UnAuthenticatedUserError,
+    EmptyPasswordFormError,
 )
 
 
@@ -139,7 +140,12 @@ app.add_exception_handler(
     ),
 )
 
-
+app.add_exception_handler(
+    exc_class_or_status_code=EmptyPasswordFormError,
+    handler=create_exception_handler(
+        status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid passwrod for attempt"
+    ),
+)
 origins = [
     "http://localhost:3000",
 ]

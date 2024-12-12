@@ -44,5 +44,6 @@ async def password_validation(
     attempt_id: int,
     story_manager: StoryManager = Depends(get_story_manager),
 ):
-    attempt_response = await db_attempt.validate_password(request, attempt_id, db, user)
-    return attempt_response
+    await story_manager.load_by_attempt_id(attempt_id)
+    check_password = await story_manager.validate_password(request.password)
+    return check_password

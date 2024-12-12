@@ -204,3 +204,151 @@ async def test_get_hints_with_access_to_other_user_attempt(
         response.json()["detail"]
         == "User doesn't have access to this attempt [EscapeRoom]"
     )
+
+
+@pytest.mark.asyncio
+async def test_password_validation_correct_password(
+    async_client: AsyncClient, authorized_headers: dict
+):
+    """
+    Test that the endpoint validates a correct password, moves to the next stage, and updates the message.
+    """
+    response = await async_client.post(
+        "/attempt/2/check_password",
+        headers=authorized_headers,
+        json={"password": "seek2"},
+    )
+    assert response.status_code == 200, "Expected status code to be 200."
+    data = response.json()
+    assert data["message"] == "Gratulacje, to prawidlowa odpowiedz"
+    assert (
+        "next_attempt" in data and data["next_attempt"] is not None
+    ), "Next attempt ID should be present."
+
+
+@pytest.mark.asyncio
+async def test_password_validation_correct_final_password(
+    async_client: AsyncClient, authorized_headers: dict
+):
+    """
+    Test that the endpoint validates the final password correctly and ends the story.
+    """
+    response = await async_client.post(
+        "/attempt/7/check_password",
+        headers=authorized_headers,
+        json={"password": "check"},  # Replace with the final test password
+    )
+    assert response.status_code == 200, "Expected status code to be 200."
+    data = response.json()
+    assert data["message"] == "Gratulacje, historia zostala zakonczona"
+    assert data["end_story"] is True, "Story should be marked as ended."
+
+
+@pytest.mark.asyncio
+async def test_password_validation_invalid_password(
+    async_client: AsyncClient, authorized_headers: dict
+):
+    """
+    Test that the endpoint handles an incorrect password correctly by providing an appropriate message.
+    """
+    response = await async_client.post(
+        "/attempt/1/check_password",
+        headers=authorized_headers,
+        json={"password": "wrong_password"},
+    )
+    assert response.status_code == 200, "Expected status code to be 200."
+    data = response.json()
+    assert data["message"] == "Nieprawidłowa odpowiedź, próbuj dalej"
+    assert data["new_hint"] is False, "No new hint should be discovered."
+    assert data["next_attempt"] is None, "No next attempt should be initiated."
+
+
+@pytest.mark.asyncio
+async def test_password_validation_new_hint_discovered(
+    async_client: AsyncClient, authorized_headers: dict
+):
+    """
+    Test that the endpoint identifies when a new hint is discovered for the given password.
+    """
+    response = await async_client.post(
+        "/attempt/2/check_password",
+        headers=authorized_headers,
+        json={
+            "password": "give me hint 5"
+        },  # Replace with a password that triggers a hint
+    )
+    assert response.status_code == 200, "Expected status code to be 200."
+    data = response.json()
+    assert data["message"] == "Nowa wskazowka zostala odkryta"
+    assert data["new_hint"] is True, "A new hint should be discovered."
+
+
+@pytest.mark.asyncio
+async def test_password_validation_new_hint_discovered(
+    async_client: AsyncClient, authorized_headers: dict
+):
+    """
+    Test that the endpoint identifies when a new hint is discovered for the given password.
+    """
+    response = await async_client.post(
+        "/attempt/2/check_password",
+        headers=authorized_headers,
+        json={
+            "password": "give me hint 4"
+        },  # Replace with a password that triggers a hint
+    )
+    assert response.status_code == 200, "Expected status code to be 200."
+    data = response.json()
+    assert data["next_attempt"] is None
+    assert data["new_hint"] is False, "A new hint should be discovered."
+    assert data["message"] == "Nieprawidłowa odpowiedź, próbuj dalej"
+
+
+@pytest.mark.asyncio
+async def test_password_validation_invalid_attempt_id(
+    async_client: AsyncClient, authorized_headers: dict
+):
+    """
+    Test that the endpoint returns a 404 error when an invalid attempt ID is provided.
+    """
+    response = await async_client.post(
+        "/attempt/99999/check_password",  # Non-existent attempt ID
+        headers=authorized_headers,
+        json={"password": "any_password"},
+    )
+    assert response.status_code == 404, "Expected status code to be 404."
+    assert (
+        response.json()["detail"] == "Attempt with 99999 id does not exist [EscapeRoom]"
+    )
+
+
+@pytest.mark.asyncio
+async def test_password_validation_unauthorized_request(async_client: AsyncClient):
+    """
+    Test that the endpoint returns a 401 Unauthorized error for requests without a valid token.
+    """
+    response = await async_client.post(
+        "/attempt/1/check_password",
+        json={"password": "any_password"},
+    )
+    assert response.status_code == 401, "Expected status code to be 401."
+    data = response.json()
+    assert "detail" in data
+    assert data["detail"] == "Unauthorized"
+
+
+@pytest.mark.asyncio
+async def test_password_validation_no_password_provided(
+    async_client: AsyncClient, authorized_headers: dict
+):
+    """
+    Test that the endpoint returns a 422 Unprocessable Entity error when no password is provided.
+    """
+    response = await async_client.post(
+        "/attempt/1/check_password",
+        headers=authorized_headers,
+        json={},
+    )
+    assert response.status_code == 422, "Expected status code to be 422."
+    data = response.json()
+    assert "detail" in data, "Response should contain details about the error."

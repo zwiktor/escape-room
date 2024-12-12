@@ -32,6 +32,7 @@ from app.exceptions.exceptions import (
     InsufficientGoldError,
     EntityDoesNotExistError,
     StoryAlreadyStartedError,
+    EmptyPasswordFormError,
 )
 
 
@@ -205,7 +206,8 @@ class StoryManager:
             next_attempt=None,
             end_story=False,
         )
-
+        if not password:
+            raise EmptyPasswordFormError(message="Password from shouldn't be empty")
         # Dodaje nowe hasło do histori nie zależnie od poprawności
         await add_password_attempt(self.db, self.current_attempt, password)
 
