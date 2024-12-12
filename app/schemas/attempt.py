@@ -13,7 +13,7 @@ class HintBase(BaseModel):
 
 
 class HintsDisplay(BaseModel):
-    hints: List[HintBase]
+    hints: Optional[List[HintBase]]
 
     model_config = ConfigDict(from_attributes=True)
 

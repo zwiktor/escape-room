@@ -53,7 +53,7 @@ def test_hints_display_schema():
 def test_attempt_display_schema():
     # Valid data with nested StageDisplay
     stage_data = {"name": "Stage 1", "level": 1, "question": "This is a test stage"}
-    valid_data = {"start_date": current_time, "stage": stage_data}
+    valid_data = {"start_date": current_time, "stage": stage_data, "is_finished": False}
     attempt_display = AttemptDisplay(**valid_data)
     assert attempt_display.start_date == current_time
     assert attempt_display.stage.name == "Stage 1"

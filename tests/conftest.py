@@ -17,6 +17,8 @@ from app.db.models import User
 from fastapi_users.password import PasswordHelper
 from app.db.db_queries import get_instance
 from app.db.storymanager import StoryManager
+from tests.routers.test_login import login_and_get_token
+
 
 REDIS_URL = "redis://localhost:6379/1"
 DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -57,7 +59,7 @@ async def setup_database():
             stages = {
                 stage_data["name"]: Stage(
                     **{k: v for k, v in stage_data.items() if k != "story_title"},
-                    story=stories[stage_data["story_title"]]
+                    story=stories[stage_data["story_title"]],
                 )
                 for stage_data in data["stages"]
             }
@@ -100,7 +102,7 @@ async def setup_database():
             hints = {
                 hint_data["text"]: Hint(
                     **{k: v for k, v in hint_data.items() if k != "stage_name"},
-                    stage=stages[hint_data["stage_name"]]
+                    stage=stages[hint_data["stage_name"]],
                 )
                 for hint_data in data["hints"]
             }
@@ -247,3 +249,15 @@ async def mock_user(session: AsyncSession):
 async def story_manager(session: AsyncSession, mock_user: User):
     """Fixture for creating a StoryManager instance."""
     return StoryManager(session, mock_user)
+
+
+@pytest_asyncio.fixture
+async def authorized_headers(async_client: AsyncClient) -> dict:
+    """
+    Fixture to provide headers with a valid authorization token.
+
+    :param async_client: AsyncClient instance for making requests.
+    :return: Dictionary containing the Authorization header with a Bearer token.
+    """
+    token = await login_and_get_token(async_client)
+    return {"Authorization": f"Bearer {token}"}

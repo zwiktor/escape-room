@@ -7,6 +7,7 @@ from app.db.models import (
     Stage,
     StoryAccess,
     PasswordAttempt,
+    User,
 )
 from app.db.db_queries import (
     get_instance,

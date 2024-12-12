@@ -33,8 +33,9 @@ async def get_hints(
     attempt_id: int,
     story_manager: StoryManager = Depends(get_story_manager),
 ):
-    hints_list = await db_attempt.get_hints(attempt_id, db, user)
-    return HintsDisplay(hints=hints_list)
+    await story_manager.load_by_attempt_id(attempt_id)
+    hints_list = await story_manager.get_hints()
+    return hints_list
 
 
 @router.post("/{attempt_id}/check_password", response_model=PasswordCheckDisplay)
